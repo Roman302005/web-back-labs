@@ -459,3 +459,120 @@ def teapot():
             <a href="/">На главную</a>
         </body>
     </html>""", 418
+
+
+@app.route('/error500')
+def error500():
+    # Вызываем ошибку деления на ноль
+    result = 1 / 0
+    return "Этот код никогда не выполнится"
+
+@app.errorhandler(500)
+def internal_server_error(err):
+    return """<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>500 - Внутренняя ошибка сервера</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+        }
+        .error-code {
+            font-size: 6em;
+            font-weight: bold;
+            color: #c23616;
+            margin: 0;
+            text-shadow: 3px 3px 0 #f8f9fa;
+        }
+        .error-title {
+            font-size: 2em;
+            color: #2c3e50;
+            margin: 10px 0;
+        }
+        .error-message {
+            font-size: 1.2em;
+            color: #7f8c8d;
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+        .error-icon {
+            font-size: 4em;
+            margin: 20px 0;
+            animation: shake 0.5s infinite;
+        }
+        .home-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 15px 30px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .home-link:hover {
+            background: #2980b9;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        @keyframes shake {
+            0%, 100% {transform: translateX(0);}
+            25% {transform: translateX(-5px);}
+            75% {transform: translateX(5px);}
+        }
+        .tech-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #e74c3c;
+            text-align: left;
+        }
+        .tech-info h3 {
+            color: #e74c3c;
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="error-icon">⚡</div>
+        <h1 class="error-code">500</h1>
+        <h2 class="error-title">Внутренняя ошибка сервера</h2>
+        <p class="error-message">
+            Что-то пошло не так на нашей стороне. Наши инженеры уже бегут 
+            с огнетушителями и отвёртками устранять проблему!
+        </p>
+        <p class="error-message">
+            Пожалуйста, попробуйте обновить страницу через несколько минут.
+        </p>
+        
+        <div class="tech-info">
+            <h3>Техническая информация:</h3>
+            <p>Произошла непредвиденная ошибка при обработке вашего запроса.</p>
+            <p>Рекомендуется запустить сервер с флагом --debug для подробной информации об ошибке.</p>
+        </div>
+        
+        <a href="/" class="home-link">Вернуться на главную</a>
+    </div>
+</body>
+</html>""", 500
