@@ -1,34 +1,10 @@
-from flask import Flask, url_for, request, redirect
-import datetime
-
-app = Flask(__name__)
-
-@app.route('/lab1')
-@app.route('/lab1/web')
-def web():
-    return """<!doctype html>
-    <html>
-        <head>
-            <title>Web Server</title>
-        </head>
-        <body>
-            <h1>web-сервер на flask</h1>
-            <a href="/index">index</a><br>
-            <a href="/lab1/author">author</a><br>
-            <a href="/lab1/image">Картинка</a><br>
-            <a href="/lab1/counter">Cчётчик</a><br>
-            <a href="/lab1/info">Редирект</a><br>
-            <a href="/lab1/created">201</a>
-            <a href="/lab1/counter/clear">Очистка</a>
-        </body>
-    </html>""", 200, {"X-Server": "sample",
-                     "Content-Type": "text/html; charset=utf-8" 
-                     }
-
-
 
 from flask import Flask, url_for, request, redirect
 import datetime
+from collections import deque
+
+# Хранилище для лога запросов (ограничим последними 20 запросами)
+request_log = deque(maxlen=20)
 
 app = Flask(__name__)
 
@@ -145,10 +121,37 @@ def lab1():
                 border-bottom: 2px solid #3498db;
                 padding-bottom: 15px;
             }
+            h2 {
+                color: #3498db;
+                margin-top: 30px;
+                border-left: 4px solid #3498db;
+                padding-left: 15px;
+            }
             .content {
                 font-size: 1.1em;
                 text-align: justify;
                 margin-bottom: 30px;
+            }
+            .routes-list {
+                list-style: none;
+                padding: 0;
+                margin: 20px 0;
+            }
+            .routes-list li {
+                margin: 10px 0;
+                padding: 10px;
+                background: #f8f9fa;
+                border-radius: 5px;
+                border-left: 3px solid #3498db;
+            }
+            .routes-list a {
+                color: #2c3e50;
+                text-decoration: none;
+                font-weight: bold;
+            }
+            .routes-list a:hover {
+                color: #3498db;
+                text-decoration: underline;
             }
             .back-link {
                 display: inline-block;
@@ -159,6 +162,7 @@ def lab1():
                 border-radius: 5px;
                 transition: all 0.3s ease;
                 font-weight: bold;
+                margin-top: 20px;
             }
             .back-link:hover {
                 background: #2980b9;
@@ -182,6 +186,24 @@ def lab1():
                 веб-приложений, сознательно предоставляющих лишь самые базовые возможности.</p>
             </div>
             
+            <h2>Список роутов</h2>
+            <ul class="routes-list">
+                <li><a href="/">Главная страница (/)</a></li>
+                <li><a href="/index">Главная страница (/index)</a></li>
+                <li><a href="/lab1/author">Автор (/lab1/author)</a></li>
+                <li><a href="/lab1/image">Картинка (/lab1/image)</a></li>
+                <li><a href="/lab1/counter">Счётчик (/lab1/counter)</a></li>
+                <li><a href="/lab1/info">Редирект (/lab1/info)</a></li>
+                <li><a href="/lab1/created">201 Created (/lab1/created)</a></li>
+                <li><a href="/400">400 Bad Request</a></li>
+                <li><a href="/401">401 Unauthorized</a></li>
+                <li><a href="/402">402 Payment Required</a></li>
+                <li><a href="/403">403 Forbidden</a></li>
+                <li><a href="/405">405 Method Not Allowed</a></li>
+                <li><a href="/418">418 I'm a teapot</a></li>
+                <li><a href="/error500">500 Internal Server Error</a></li>
+            </ul>
+            
             <div class="text-center">
                 <a href="/" class="back-link">Вернуться на главную</a>
             </div>
@@ -204,7 +226,6 @@ def author():
             <p>Студент: """ + name + """ </p>
             <p>Группа: """ + group + """ </p>
             <p>Факультет: """ + faculty + """ </p>
-            <a href="/lab1/web">web</a>
         </body>
     </html>
     """
@@ -228,7 +249,6 @@ def image():
                     <img src="''' + image_path + '''" alt="Дуб">
                 </div>
                 <p class="description">это м8</p>
-                <a href="/lab1/web" class="back-link">← Вернуться на главную</a>
             </div>
         </body>
     </html>
@@ -292,58 +312,100 @@ def clear_counter():
 
 @app.errorhandler(404)
 def not_found(err):
-    return """<!doctype html>
+    client_ip = request.remote_addr
+    access_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    requested_path = request.path
+    
+    # Генерируем HTML для лога запросов
+    log_html = ''
+    for entry in request_log:
+        log_html += f'''
+        <tr>
+            <td>{entry['timestamp']}</td>
+            <td>{entry['ip']}</td>
+            <td>{entry['method']}</td>
+            <td>{entry['path']}</td>
+            <td>{entry['user_agent']}</td>
+        </tr>'''
+    
+    return f"""<!doctype html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>404 - Страница не найдена</title>
     <style>
-        body {
+        body {{
             font-family: 'Arial', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             margin: 0;
-            padding: 0;
+            padding: 20px;
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             color: #333;
-        }
-        .container {
-            text-align: center;
+        }}
+        .container {{
+            max-width: 1200px;
+            margin: 0 auto;
             background: rgba(255, 255, 255, 0.95);
-            padding: 40px;
+            padding: 30px;
             border-radius: 20px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-            max-width: 500px;
-        }
-        .error-code {
+        }}
+        .error-header {{
+            text-align: center;
+            margin-bottom: 30px;
+        }}
+        .error-code {{
             font-size: 6em;
             font-weight: bold;
             color: #e74c3c;
             margin: 0;
             text-shadow: 3px 3px 0 #f8f9fa;
-        }
-        .error-title {
+        }}
+        .error-title {{
             font-size: 2em;
             color: #2c3e50;
             margin: 10px 0;
-        }
-        .error-message {
-            font-size: 1.2em;
-            color: #7f8c8d;
+        }}
+        .error-info {{
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
             margin: 20px 0;
-            line-height: 1.6;
-        }
-        .teapot {
-            font-size: 4em;
+            border-left: 4px solid #3498db;
+        }}
+        .error-info h3 {{
+            color: #3498db;
+            margin-top: 0;
+        }}
+        .error-info p {{
+            margin: 5px 0;
+        }}
+        .log-table {{
+            width: 100%;
+            border-collapse: collapse;
             margin: 20px 0;
-            animation: bounce 2s infinite;
-        }
-        .home-link {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }}
+        .log-table th,
+        .log-table td {{
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }}
+        .log-table th {{
+            background: #3498db;
+            color: white;
+            font-weight: bold;
+        }}
+        .log-table tr:hover {{
+            background: #f5f5f5;
+        }}
+        .home-link {{
             display: inline-block;
-            margin-top: 20px;
             padding: 15px 30px;
             background: #3498db;
             color: white;
@@ -351,36 +413,70 @@ def not_found(err):
             border-radius: 50px;
             font-weight: bold;
             transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
-        }
-        .home-link:hover {
+            margin-top: 20px;
+        }}
+        .home-link:hover {{
             background: #2980b9;
             transform: translateY(-3px);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
-            40% {transform: translateY(-20px);}
-            60% {transform: translateY(-10px);}
-        }
+        }}
+        .text-center {{
+            text-align: center;
+        }}
+        .teapot {{
+            font-size: 4em;
+            margin: 20px 0;
+            animation: bounce 2s infinite;
+        }}
+        @keyframes bounce {{
+            0%, 20%, 50%, 80%, 100% {{transform: translateY(0);}}
+            40% {{transform: translateY(-20px);}}
+            60% {{transform: translateY(-10px);}}
+        }}
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="teapot">🧭</div>
-        <h1 class="error-code">404</h1>
-        <h2 class="error-title">Ой! Заблудились?</h2>
-        <p class="error-message">
-            Кажется, вы свернули не туда. Эта страница отправилась в космическое 
-            путешествие и пока не вернулась. Возможно, она просто затерялась 
-            среди звёзд и галактик...
-        </p>
-        <p class="error-message">
-            Не волнуйтесь! Наш навигационный компас поможет вам вернуться 
-            на безопасную орбиту.
-        </p>
-        <a href="/" class="home-link">Вернуться на главную</a>
+        <div class="error-header">
+            <div class="teapot">🧭</div>
+            <h1 class="error-code">404</h1>
+            <h2 class="error-title">Ой! Заблудились?</h2>
+        </div>
+
+        <div class="error-info">
+            <h3>Информация о запросе:</h3>
+            <p><strong>Ваш IP-адрес:</strong> {client_ip}</p>
+            <p><strong>Дата и время:</strong> {access_date}</p>
+            <p><strong>Запрошенный адрес:</strong> {requested_path}</p>
+            <p><strong>User-Agent:</strong> {request.headers.get('User-Agent', 'Unknown')[:80]}...</p>
+        </div>
+
+        <div class="error-info">
+            <h3>Журнал последних запросов:</h3>
+            <table class="log-table">
+                <thead>
+                    <tr>
+                        <th>Время</th>
+                        <th>IP-адрес</th>
+                        <th>Метод</th>
+                        <th>Путь</th>
+                        <th>User-Agent</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {log_html if log_html else '''
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #7f8c8d;">
+                            Пока нет записей в журнале
+                        </td>
+                    </tr>'''}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="text-center">
+            <a href="/" class="home-link">Вернуться на главную</a>
+        </div>
     </div>
 </body>
 </html>""", 404
@@ -586,3 +682,18 @@ def internal_server_error(err):
     </div>
 </body>
 </html>""", 500
+
+
+
+@app.before_request
+def log_request():
+    """Логируем все запросы перед обработкой"""
+    if request.path != '/favicon.ico':  # Игнорируем запросы favicon
+        log_entry = {
+            'ip': request.remote_addr,
+            'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'path': request.path,
+            'method': request.method,
+            'user_agent': request.headers.get('User-Agent', 'Unknown')[:50]
+        }
+        request_log.appendleft(log_entry)
