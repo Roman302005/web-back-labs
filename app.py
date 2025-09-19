@@ -113,6 +113,84 @@ def index():
 
 
 
+@app.route('/lab1')
+def lab1():
+    return """<!doctype html>
+    <html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Лабораторная 1</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 20px;
+                background-color: #f8f9fa;
+                color: #333;
+                line-height: 1.6;
+            }
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
+                background: white;
+                padding: 30px;
+                border-radius: 10px;
+                box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            }
+            h1 {
+                color: #2c3e50;
+                text-align: center;
+                margin-bottom: 30px;
+                border-bottom: 2px solid #3498db;
+                padding-bottom: 15px;
+            }
+            .content {
+                font-size: 1.1em;
+                text-align: justify;
+                margin-bottom: 30px;
+            }
+            .back-link {
+                display: inline-block;
+                padding: 12px 25px;
+                background: #3498db;
+                color: white;
+                text-decoration: none;
+                border-radius: 5px;
+                transition: all 0.3s ease;
+                font-weight: bold;
+            }
+            .back-link:hover {
+                background: #2980b9;
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            }
+            .text-center {
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Лабораторная работа 1</h1>
+            
+            <div class="content">
+                <p>Flask — фреймворк для создания веб-приложений на языке
+                программирования Python, использующий набор инструментов
+                Werkzeug, а также шаблонизатор Jinja2. Относится к категории так
+                называемых микрофреймворков — минималистичных каркасов
+                веб-приложений, сознательно предоставляющих лишь самые базовые возможности.</p>
+            </div>
+            
+            <div class="text-center">
+                <a href="/" class="back-link">Вернуться на главную</a>
+            </div>
+        </div>
+    </body>
+    </html>""", 200, {"Content-Type": "text/html; charset=utf-8"}
+
+
+
 @app.route('/lab1/author')
 def author():
     name = 'Лелюх Роман Вячеславович'
