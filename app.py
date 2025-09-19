@@ -50,16 +50,16 @@ def image():
     <!doctype html>
     <html>
         <head>
-            <title>Картинка с дубом</title>
+            <title>БМВ М8</title>
             <link rel="stylesheet" href="''' + css_path + '''">
         </head>
         <body class="image-page">
             <div class="container">
-                <h1>Могучий дуб</h1>
+                <h1>МКА МКА</h1>
                 <div class="image-wrapper">
                     <img src="''' + image_path + '''" alt="Дуб">
                 </div>
-                <p class="description">это м8'</p>
+                <p class="description">это м8</p>
                 <a href="/web" class="back-link">← Вернуться на главную</a>
             </div>
         </body>
