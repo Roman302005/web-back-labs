@@ -14,6 +14,7 @@ def web():
             <a href="/image">Картинка</a>
             <a href="/counter">Cчётчик</a>
             <a href="/info">Редирект</a>
+            <a href="/lab1/created">201</a>
         </body>
     </html>"""
 
@@ -79,3 +80,19 @@ def counter():
 @app.route('/info')
 def info():
     return redirect("/author")
+
+
+
+
+
+@app.route('/lab1/created')
+def created():
+    return '''
+    <!doctype html>
+    <html>
+        <body>
+            <h1>Создайте успешно</h1>
+            <div><i>что-то создано..</i>
+        </body>
+    </html>
+    ''', 201
