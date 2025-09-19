@@ -214,7 +214,7 @@ def image():
     image_path = url_for('static', filename='oak.jpg')
     css_path = url_for('static', filename='lab1.css')
     
-    return '''
+    html_content = '''
     <!doctype html>
     <html>
         <head>
@@ -233,6 +233,16 @@ def image():
         </body>
     </html>
     '''
+    
+    headers = {
+        "Content-Type": "text/html; charset=utf-8",
+        "Content-Language": "ru-RU",
+        "X-Custom-Header": "Flask-Image-Server",
+        "X-Server-Version": "1.0.0",
+        "X-Image-Name": "oak.jpg"
+    }
+    
+    return html_content, 200, headers
 
 count = 0
 
