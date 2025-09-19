@@ -8,16 +8,20 @@ app = Flask(__name__)
 def web():
     return """<!doctype html>
     <html>
+        <head>
+            <title>Web Server</title>
+        </head>
         <body>
             <h1>web-сервер на flask</h1>
-            <a href="/author">author</a>
-            <a href="/image">Картинка</a>
-            <a href="/counter">Cчётчик</a>
-            <a href="/info">Редирект</a>
+            <a href="/author">author</a><br>
+            <a href="/image">Картинка</a><br>
+            <a href="/counter">Cчётчик</a><br>
+            <a href="/info">Редирект</a><br>
             <a href="/lab1/created">201</a>
         </body>
-    </html>"""
-
+    </html>""", 200, {"X-Server": "sample",
+                     "Content-Type": "text/html; charset=utf-8" 
+                     }
 
 @app.route('/author')
 def author():
@@ -37,22 +41,30 @@ def author():
     </html>
     """
 
-
-
-
 @app.route('/image')
 def image():
-    path = url_for('static', filename='oak.jpg')
+    image_path = url_for('static', filename='oak.jpg')
+    css_path = url_for('static', filename='lab1.css')
+    
     return '''
     <!doctype html>
     <html>
-        <body>
-            <h1>М8</h1>
-            <img src=" ''' + path + ''' ">
+        <head>
+            <title>Картинка с дубом</title>
+            <link rel="stylesheet" href="''' + css_path + '''">
+        </head>
+        <body class="image-page">
+            <div class="container">
+                <h1>Могучий дуб</h1>
+                <div class="image-wrapper">
+                    <img src="''' + image_path + '''" alt="Дуб">
+                </div>
+                <p class="description">это м8'</p>
+                <a href="/web" class="back-link">← Вернуться на главную</a>
+            </div>
         </body>
     </html>
     '''
-
 
 count = 0
 
@@ -76,14 +88,9 @@ def counter():
     </html>
     '''
 
-
 @app.route('/info')
 def info():
     return redirect("/author")
-
-
-
-
 
 @app.route('/lab1/created')
 def created():
@@ -97,9 +104,6 @@ def created():
     </html>
     ''', 201
 
-
-
-
-@app.errorhandler('404')
+@app.errorhandler(404)
 def not_found(err):
     return 'такой страницы нет', 404
