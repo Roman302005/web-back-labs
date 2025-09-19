@@ -4,7 +4,7 @@ import datetime
 app = Flask(__name__)
 
 @app.route('/')
-@app.route('/web')
+@app.route('/lab1/web')
 def web():
     return """<!doctype html>
     <html>
@@ -13,17 +13,18 @@ def web():
         </head>
         <body>
             <h1>web-сервер на flask</h1>
-            <a href="/author">author</a><br>
-            <a href="/image">Картинка</a><br>
-            <a href="/counter">Cчётчик</a><br>
-            <a href="/info">Редирект</a><br>
+            <a href="/lab1/author">author</a><br>
+            <a href="/lab1/image">Картинка</a><br>
+            <a href="/lab1/counter">Cчётчик</a><br>
+            <a href="/lab1/info">Редирект</a><br>
             <a href="/lab1/created">201</a>
+            <a href="/lab1/counter/clear">Очистка</a>
         </body>
     </html>""", 200, {"X-Server": "sample",
                      "Content-Type": "text/html; charset=utf-8" 
                      }
 
-@app.route('/author')
+@app.route('/lab1/author')
 def author():
     name = 'Лелюх Роман Вячеславович'
     group = 'ФБИ-34'
@@ -36,12 +37,12 @@ def author():
             <p>Студент: """ + name + """ </p>
             <p>Группа: """ + group + """ </p>
             <p>Факультет: """ + faculty + """ </p>
-            <a href="/web">web</a>
+            <a href="/lab1/web">web</a>
         </body>
     </html>
     """
 
-@app.route('/image')
+@app.route('/lab1/image')
 def image():
     image_path = url_for('static', filename='oak.jpg')
     css_path = url_for('static', filename='lab1.css')
@@ -60,7 +61,7 @@ def image():
                     <img src="''' + image_path + '''" alt="Дуб">
                 </div>
                 <p class="description">это м8</p>
-                <a href="/web" class="back-link">← Вернуться на главную</a>
+                <a href="/lab1/web" class="back-link">← Вернуться на главную</a>
             </div>
         </body>
     </html>
@@ -68,7 +69,7 @@ def image():
 
 count = 0
 
-@app.route('/counter')
+@app.route('/lab1/counter')
 def counter():
     global count
     count += 1
@@ -88,9 +89,9 @@ def counter():
     </html>
     '''
 
-@app.route('/info')
+@app.route('/lab1/info')
 def info():
-    return redirect("/author")
+    return redirect("/lab1/author")
 
 @app.route('/lab1/created')
 def created():
@@ -104,6 +105,16 @@ def created():
     </html>
     ''', 201
 
+
+@app.route('/lab1/counter/clear')
+def clear_counter():
+    global count
+    count = 0
+    return redirect('/lab1/counter')
+
+
 @app.errorhandler(404)
 def not_found(err):
     return 'такой страницы нет', 404
+
+
