@@ -1,4 +1,5 @@
-from flask import Flask, url_for
+from flask import Flask, url_for, request
+import datetime
 
 app = Flask(__name__)
 
@@ -11,6 +12,7 @@ def web():
             <h1>web-сервер на flask</h1>
             <a href="/author">author</a>
             <a href="/image">Картинка</a>
+            <a href="/counter">Cчётчик</a>
         </body>
     </html>"""
 
@@ -45,6 +47,29 @@ def image():
         <body>
             <h1>М8</h1>
             <img src=" ''' + path + ''' ">
+        </body>
+    </html>
+    '''
+
+
+count = 0
+
+@app.route('/counter')
+def counter():
+    global count
+    count += 1
+    time = datetime.datetime.today()
+    url = request.url
+    client_ip = request.remote_addr
+    return '''
+    <!doctype html>
+    <html>
+        <body>
+            Сколько раз вы сюда заходили ''' + str(count) + '''
+            <hr>
+            Дата и время: ''' + str(time) + ''' <br>
+            Запрошенный адрес: ''' + url + ''' <br>
+            Ваш IP-адрес: ''' + client_ip + ''' <br>
         </body>
     </html>
     '''
