@@ -282,7 +282,98 @@ def clear_counter():
 
 @app.errorhandler(404)
 def not_found(err):
-    return 'такой страницы нет', 404
+    return """<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Страница не найдена</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+        }
+        .error-code {
+            font-size: 6em;
+            font-weight: bold;
+            color: #e74c3c;
+            margin: 0;
+            text-shadow: 3px 3px 0 #f8f9fa;
+        }
+        .error-title {
+            font-size: 2em;
+            color: #2c3e50;
+            margin: 10px 0;
+        }
+        .error-message {
+            font-size: 1.2em;
+            color: #7f8c8d;
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+        .teapot {
+            font-size: 4em;
+            margin: 20px 0;
+            animation: bounce 2s infinite;
+        }
+        .home-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 15px 30px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        .home-link:hover {
+            background: #2980b9;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-20px);}
+            60% {transform: translateY(-10px);}
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="teapot">🧭</div>
+        <h1 class="error-code">404</h1>
+        <h2 class="error-title">Ой! Заблудились?</h2>
+        <p class="error-message">
+            Кажется, вы свернули не туда. Эта страница отправилась в космическое 
+            путешествие и пока не вернулась. Возможно, она просто затерялась 
+            среди звёзд и галактик...
+        </p>
+        <p class="error-message">
+            Не волнуйтесь! Наш навигационный компас поможет вам вернуться 
+            на безопасную орбиту.
+        </p>
+        <a href="/" class="home-link">Вернуться на главную</a>
+    </div>
+</body>
+</html>""", 404
 
 
 @app.route('/400')
