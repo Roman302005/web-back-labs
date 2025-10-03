@@ -697,3 +697,11 @@ def log_request():
             'user_agent': request.headers.get('User-Agent', 'Unknown')[:50]
         }
         request_log.appendleft(log_entry)
+
+@app.route('/laba2/a')
+def a124():
+    return 'без слэша'
+
+@app.route('/laba2/a/')
+def a124():
+    return 'со слэшем'    
