@@ -699,9 +699,20 @@ def log_request():
         request_log.appendleft(log_entry)
 
 @app.route('/laba2/a')
-def a124():
+def a1():
     return 'без слэша'
 
 @app.route('/laba2/a/')
-def a124():
+def a12():
     return 'со слэшем'    
+
+
+flower_list=('роза', 'тюльпан', 'незабудка', 'ромашка')
+
+
+@app.route('/laba2/flowers/<int:flower_id>')
+def flowers(flower_id):
+    if flower_id >= len(flower_list):
+        abort(404)
+    else:
+        return 'цветок:' + flower_list[flower_id]
