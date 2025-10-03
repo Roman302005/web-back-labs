@@ -24,9 +24,16 @@
 
     <main>
         5 + 2 = {{5 + 2}}<br>
-        11 x 28 = {{11 * 28}}<br>
+        11 × 28 = {{11 * 28}}<br>
         8452 / 793 = {{8452 / 793}}<br>
         <p>45<sup>8</sup> = {{45**8}}</p>
+
+        <h3>Список фруктов:</h3>
+        <ul>
+            {% for f in fruits %}
+            <li>{{ loop.index }} - {{ f.name }}: {{ f.price }} ₽</li>
+            {% endfor %}
+        </ul>
     </main>
 
     <footer>
