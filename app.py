@@ -1,8 +1,8 @@
 from flask import Flask, url_for, request, redirect, abort, render_template
 import datetime
 from collections import deque
-from lab1 import lab1
-from lab2 import lab2
+from lab1.lab1 import lab1
+from lab2.lab2 import lab2
 from lab3.lab3 import lab3
 request_log = deque(maxlen=20)
 
