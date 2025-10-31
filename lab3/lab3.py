@@ -96,3 +96,48 @@ def settings():
                          color=color or '#000000',
                          bg_color=bg_color or '#ffffff', 
                          font_size=font_size or '16')
+
+@lab3.route('/lab3/ticket')
+def ticket():
+    errors = {}
+    fio = request.args.get('fio')
+    shelf = request.args.get('shelf')
+    linen = request.args.get('linen')
+    baggage = request.args.get('baggage')
+    age = request.args.get('age')
+    departure = request.args.get('departure')
+    destination = request.args.get('destination')
+    date = request.args.get('date')
+    insurance = request.args.get('insurance')
+    
+    if not fio: errors['fio'] = "Заполните ФИО"
+    if not shelf: errors['shelf'] = "Выберите полку"
+    if not age: errors['age'] = "Укажите возраст"
+    elif not age.isdigit() or not (1 <= int(age) <= 120):
+        errors['age'] = "Возраст от 1 до 120 лет"
+    if not departure: errors['departure'] = "Укажите пункт выезда"
+    if not destination: errors['destination'] = "Укажите пункт назначения"
+    if not date: errors['date'] = "Укажите дату"
+    
+    if errors:
+        return render_template('lab3/ticket_form.html', errors=errors, 
+                             fio=fio, shelf=shelf, linen=linen, baggage=baggage,
+                             age=age, departure=departure, destination=destination,
+                             date=date, insurance=insurance)
+    
+    price = 1000 if int(age) >= 18 else 700
+    if shelf in ['lower', 'lower-side']: price += 100
+    if linen == 'on': price += 75
+    if baggage == 'on': price += 250
+    if insurance == 'on': price += 150
+    
+    ticket_type = "Детский билет" if int(age) < 18 else "Взрослый билет"
+    
+    return render_template('lab3/ticket_result.html',
+                         fio=fio, shelf=shelf, linen=linen, baggage=baggage,
+                         age=age, departure=departure, destination=destination,
+                         date=date, insurance=insurance, price=price, ticket_type=ticket_type)
+
+@lab3.route('/lab3/ticket-form')
+def ticket_form():
+    return render_template('lab3/ticket_form.html')
