@@ -17,8 +17,8 @@
         
     </ol>
     {% if name and name_color %}
-    <div>
-        Привет, <span style="color: {{ name_color }}">{{ name }}</span>!
-    </div>
+
+        <div>Привет, {{ name }}! Возраст: {{ age }}</div>
+
     {% endif %}
 {% endblock %}
