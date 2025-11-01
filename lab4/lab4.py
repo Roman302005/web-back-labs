@@ -201,3 +201,60 @@ def fridge():
             return render_template('lab4/fridge.html', temperature=temp, snowflakes=snowflakes)
     
     return render_template('lab4/fridge.html')
+
+
+@lab4.route('/lab4/seed', methods=['GET', 'POST'])
+def seed():
+    if request.method == 'POST':
+        grain_type = request.form.get('grain_type')
+        weight = request.form.get('weight')
+
+        prices = {
+            'barley': 12000,  
+            'oats': 8500,     
+            'wheat': 9000,    
+            'rye': 15000      
+        }
+        
+        grain_names = {
+            'barley': 'ячмень',
+            'oats': 'овёс', 
+            'wheat': 'пшеница',
+            'rye': 'рожь'
+        }
+        
+        if not weight:
+            return render_template('lab4/seed.html', error='Ошибка: не указан вес')
+        
+        try:
+            weight_float = float(weight)
+        except ValueError:
+            return render_template('lab4/seed.html', error='Ошибка: введите числовое значение веса')
+        
+        if weight_float <= 0:
+            return render_template('lab4/seed.html', error='Ошибка: вес должен быть больше 0')
+        
+        if weight_float > 100:
+            return render_template('lab4/seed.html', error='Извините, такого объёма сейчас нет в наличии')
+        
+        price_per_ton = prices.get(grain_type)
+        if not price_per_ton:
+            return render_template('lab4/seed.html', error='Ошибка: выберите тип зерна')
+        
+        total = weight_float * price_per_ton
+        
+        discount = 0
+        if weight_float > 10:
+            discount = total * 0.1
+            total -= discount
+        
+        grain_name = grain_names.get(grain_type)
+        
+        return render_template('lab4/seed.html', 
+                             success=True,
+                             grain=grain_name,
+                             weight=weight_float,
+                             total=total,
+                             discount=discount)
+    
+    return render_template('lab4/seed.html')
