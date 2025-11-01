@@ -4,13 +4,14 @@ from collections import deque
 from lab1.lab1 import lab1
 from lab2.lab2 import lab2
 from lab3.lab3 import lab3
+from lab4.lab4 import lab4
 request_log = deque(maxlen=20)
 
 app = Flask(__name__)
 app.register_blueprint(lab1)
 app.register_blueprint(lab2)
 app.register_blueprint(lab3)
-
+app.register_blueprint(lab4)
 
 
 @app.route('/')
@@ -115,6 +116,7 @@ def main():
                 <a href="/lab1">Лабораторная работа 1</a>
                 <a href="/lab2">Лабораторная работа 2</a>
                <a href="/lab3/">Лабораторная работа 3</a>
+               <a href="/lab4/">Лабораторная работа 4</a>
             </div>
 
             <div class="lab-section">
