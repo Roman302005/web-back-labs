@@ -1,4 +1,4 @@
-from flask import Blueprint, url_for, request, redirect, abort, render_template, make_response
+from flask import Blueprint, render_template, request, redirect, session
 import datetime
 from collections import deque
 from flask import request
@@ -124,3 +124,37 @@ def tree():
         return redirect('/lab4/tree')
     
     return render_template('lab4/tree.html', tree_count=tree_count)
+
+users = [
+    {'login': 'alex', 'password': '123'},
+    {'login': 'bob', 'password': '555'},
+    {'login': 'cat', 'password': '777'},
+    {'login': 'dog', 'password': '999'}
+]
+
+@lab4.route('/lab4/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'GET':
+        if 'login' in session:
+            authorized = True
+            login = session['login']
+        else:
+            authorized = False
+            login = ''
+        return render_template('lab4/login.html', authorized=authorized, login=login)
+    
+    login = request.form.get('login')
+    password = request.form.get('password')
+    
+    for user in users:
+        if login == user['login'] and password == user['password']:
+            session['login'] = login
+            return redirect('/lab4/login')
+    
+    error = 'Неверные логин и/или пароль'
+    return render_template('lab4/login.html', error=error, authorized=False)
+
+@lab4.route('/lab4/logout', methods=['POST'])
+def logout():
+    session.pop('login', None)
+    return redirect('/lab4/login')
