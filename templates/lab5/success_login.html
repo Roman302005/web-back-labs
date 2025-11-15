@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block lab %}Лабораторная работа 5{% endblock %}
+
+{% block main %}
+    <h1>Вход выполнен успешно!</h1>
+    
+    <p>Добро пожаловать, <strong>{{ login }}</strong>! Вы успешно вошли в систему.</p>
+    
+    <div style="margin-top: 20px;">
+        <a href="/lab5">Перейти к базе знаний</a>
+    </div>
+{% endblock %}
