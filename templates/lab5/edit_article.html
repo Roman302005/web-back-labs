@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактирование статьи - Лабораторная работа 5</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Редактирование статьи</h1>
+        <div style="text-align: center; margin: 10px 0;">
+            <a href="/lab5/list">Назад к статьям</a>
+        </div>
+    </header>
+
+    <main>
+        {% if error %}
+            <div style="color: red; margin-bottom: 20px;">{{ error }}</div>
+        {% endif %}
+        
+        <form method="post">
+            <div>
+                <label>
+                    Название статьи:
+                    <input type="text" name="title" value="{{ article.title }}" maxlength="50" required>
+                </label>
+            </div>
+
+            <div>
+                <label>
+                    Текст статьи:
+                    <textarea name="article_text" required>{{ article.article_text }}</textarea>
+                </label>
+            </div>
+
+            <button type="submit">Сохранить изменения</button>
+        </form>
+    </main>
+
+    <footer>
+        &copy; Лелюх Роман, ФБИ-34, 3 курс, 2025
+    </footer>
+</body>
+</html>

@@ -174,6 +174,9 @@ def create():
     if not (title and article_text):
         return render_template('lab5/create_article.html', error='Заполните все поля')
     
+    if len(title.strip()) == 0 or len(article_text.strip()) == 0:
+        return render_template('lab5/create_article.html', error='Тема и текст статьи не могут быть пустыми')
+    
     try:
         conn, cur = db_connect()
         
@@ -185,7 +188,7 @@ def create():
                      (user_id, title, article_text, True))
         
         db_close(conn, cur)
-        return redirect('/lab5')
+        return redirect('/lab5/list')
     
     except Exception as e:
         print(f"Ошибка при создании статьи: {e}")
@@ -205,7 +208,7 @@ def list_articles():
         user = cur.fetchone()
         user_id = user['id']
         
-        execute_query(cur, "SELECT * FROM articles WHERE user_id=?;", (user_id,))
+        execute_query(cur, "SELECT * FROM articles WHERE user_id=? ORDER BY created_at DESC;", (user_id,))
         articles = cur.fetchall()
         
         db_close(conn, cur)
@@ -215,3 +218,70 @@ def list_articles():
         print(f"Ошибка при загрузке статей: {e}")
         traceback.print_exc()
         return render_template('lab5/articles.html', articles=[], error=f'Ошибка при загрузке статей: {str(e)}')
+
+@lab5.route('/lab5/edit/<int:article_id>', methods=['GET', 'POST'])
+def edit_article(article_id):
+    login = session.get('login')
+    if not login:
+        return redirect('/lab5/login')
+    
+    try:
+        conn, cur = db_connect()
+        
+        execute_query(cur, "SELECT id FROM users WHERE login=?;", (login,))
+        user = cur.fetchone()
+        user_id = user['id']
+        
+        if request.method == 'GET':
+            execute_query(cur, "SELECT * FROM articles WHERE id=? AND user_id=?;", (article_id, user_id))
+            article = cur.fetchone()
+            
+            if not article:
+                db_close(conn, cur)
+                return redirect('/lab5/list')
+            
+            db_close(conn, cur)
+            return render_template('lab5/edit_article.html', article=article)
+        
+        title = request.form.get('title')
+        article_text = request.form.get('article_text')
+        
+        if not (title and article_text):
+            return render_template('lab5/edit_article.html', article={'id': article_id, 'title': title, 'article_text': article_text}, error='Заполните все поля')
+        
+        if len(title.strip()) == 0 or len(article_text.strip()) == 0:
+            return render_template('lab5/edit_article.html', article={'id': article_id, 'title': title, 'article_text': article_text}, error='Тема и текст статьи не могут быть пустыми')
+        
+        execute_query(cur, "UPDATE articles SET title=?, article_text=? WHERE id=? AND user_id=?;", 
+                     (title, article_text, article_id, user_id))
+        
+        db_close(conn, cur)
+        return redirect('/lab5/list')
+    
+    except Exception as e:
+        print(f"Ошибка при редактировании статьи: {e}")
+        traceback.print_exc()
+        return render_template('lab5/edit_article.html', error=f'Ошибка при редактировании статьи: {str(e)}')
+
+@lab5.route('/lab5/delete/<int:article_id>')
+def delete_article(article_id):
+    login = session.get('login')
+    if not login:
+        return redirect('/lab5/login')
+    
+    try:
+        conn, cur = db_connect()
+        
+        execute_query(cur, "SELECT id FROM users WHERE login=?;", (login,))
+        user = cur.fetchone()
+        user_id = user['id']
+        
+        execute_query(cur, "DELETE FROM articles WHERE id=? AND user_id=?;", (article_id, user_id))
+        
+        db_close(conn, cur)
+        return redirect('/lab5/list')
+    
+    except Exception as e:
+        print(f"Ошибка при удалении статьи: {e}")
+        traceback.print_exc()
+        return redirect('/lab5/list')
