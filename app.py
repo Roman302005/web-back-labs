@@ -1,5 +1,6 @@
 from flask import Flask, url_for, request, redirect, abort, render_template
 import datetime
+import os
 from collections import deque
 from lab1.lab1 import lab1
 from lab2.lab2 import lab2
@@ -9,6 +10,10 @@ from lab5.lab5 import lab5
 request_log = deque(maxlen=20)
 
 app = Flask(__name__)
+
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'секретно-секретный-секрет')
+app.config['DB_TYPE'] = os.getenv('DB_TYPE', 'postgres')
+
 app.register_blueprint(lab1)
 app.register_blueprint(lab2)
 app.register_blueprint(lab3)

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Лабораторная работа 5</title>
+    <title>Мои статьи - Лабораторная работа 5</title>
     <style>
         * {
             margin: 0;
@@ -94,51 +94,30 @@
             border: 1px solid #e74c3c;
         }
 
-        .success {
-            color: #27ae60;
-            background: #d5f4e6;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            border: 1px solid #27ae60;
+        .article {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
         }
 
-        form {
-            max-width: 400px;
-            margin: 0 auto;
+        .article h2 {
+            color: #2c3e50;
+            margin-bottom: 10px;
         }
 
-        form div {
-            margin-bottom: 15px;
+        .article blockquote {
+            background: #f9f9f9;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 10px 0;
+            font-style: italic;
+            white-space: pre-line;
         }
 
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        input[type="text"],
-        input[type="password"] {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-
-        button {
-            background: #3498db;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        button:hover {
-            background: #2980b9;
+        .no-articles {
+            text-align: center;
+            color: #666;
+            padding: 2rem;
         }
 
         .links {
@@ -162,20 +141,16 @@
         <header>
             <h1>WEB-программирование, часть 2. Лабораторная работа 5</h1>
             <div class="user-info">
-                {% if login %}
-                    Пользователь: <strong>{{ login }}</strong>
-                {% else %}
-                    Пользователь: <strong>Гость</strong>
-                {% endif %}
+                Мои статьи
             </div>
         </header>
 
         <nav>
             <ul class="nav-links">
                 <li><a href="/lab5">Главная</a></li>
+                <li><a href="/lab5/create">Создать статью</a></li>
+                <li><a href="/lab5/list">Мои статьи</a></li>
                 {% if login %}
-                    <li><a href="/lab5/create">Создать статью</a></li>
-                    <li><a href="/lab5/list">Мои статьи</a></li>
                     <li><a href="/lab5/logout">Выйти</a></li>
                 {% else %}
                     <li><a href="/lab5/login">Войти</a></li>
@@ -185,19 +160,30 @@
         </nav>
 
         <main>
-            <h2>База знаний</h2>
-            <p>Добро пожаловать в систему управления статьями!</p>
+            <h1>Статьи</h1>
             
-            {% if login %}
-                <div style="margin-top: 20px; padding: 15px; background: #e8f4f8; border-radius: 5px;">
-                    <p>Вы вошли как: <strong>{{ login }}</strong></p>
-                    <p>Теперь вы можете работать с базой знаний.</p>
-                </div>
+            {% if error %}
+                <div class="error">{{ error }}</div>
+            {% endif %}
+            
+            {% if articles %}
+                {% for article in articles %}
+                    <div class="article">
+                        <h2>{{ article['title'] }}</h2>
+                        <blockquote>{{ article['article_text'] }}</blockquote>
+                    </div>
+                {% endfor %}
             {% else %}
-                <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 5px;">
-                    <p>Для работы с базой знаний необходимо <a href="/lab5/login">войти</a> или <a href="/lab5/register">зарегистрироваться</a>.</p>
+                <div class="no-articles">
+                    <p>У вас пока нет статей.</p>
+                    <p><a href="/lab5/create">Создайте свою первую статью!</a></p>
                 </div>
             {% endif %}
+            
+            <div class="links">
+                <a href="/lab5/create">Создать новую статью</a> | 
+                <a href="/lab5">Назад к главной</a>
+            </div>
         </main>
 
         <footer>

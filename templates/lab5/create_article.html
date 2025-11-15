@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Лабораторная работа 5</title>
+    <title>Создание статьи - Лабораторная работа 5</title>
     <style>
         * {
             margin: 0;
@@ -94,17 +94,8 @@
             border: 1px solid #e74c3c;
         }
 
-        .success {
-            color: #27ae60;
-            background: #d5f4e6;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            border: 1px solid #27ae60;
-        }
-
         form {
-            max-width: 400px;
+            max-width: 800px;
             margin: 0 auto;
         }
 
@@ -119,12 +110,17 @@
         }
 
         input[type="text"],
-        input[type="password"] {
+        textarea {
             width: 100%;
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 16px;
+        }
+
+        textarea {
+            height: 300px;
+            resize: vertical;
         }
 
         button {
@@ -162,20 +158,15 @@
         <header>
             <h1>WEB-программирование, часть 2. Лабораторная работа 5</h1>
             <div class="user-info">
-                {% if login %}
-                    Пользователь: <strong>{{ login }}</strong>
-                {% else %}
-                    Пользователь: <strong>Гость</strong>
-                {% endif %}
+                Создание статьи
             </div>
         </header>
 
         <nav>
             <ul class="nav-links">
                 <li><a href="/lab5">Главная</a></li>
+                <li><a href="/lab5/create">Создать статью</a></li>
                 {% if login %}
-                    <li><a href="/lab5/create">Создать статью</a></li>
-                    <li><a href="/lab5/list">Мои статьи</a></li>
                     <li><a href="/lab5/logout">Выйти</a></li>
                 {% else %}
                     <li><a href="/lab5/login">Войти</a></li>
@@ -185,19 +176,35 @@
         </nav>
 
         <main>
-            <h2>База знаний</h2>
-            <p>Добро пожаловать в систему управления статьями!</p>
+            <h2>Создание статьи</h2>
             
-            {% if login %}
-                <div style="margin-top: 20px; padding: 15px; background: #e8f4f8; border-radius: 5px;">
-                    <p>Вы вошли как: <strong>{{ login }}</strong></p>
-                    <p>Теперь вы можете работать с базой знаний.</p>
-                </div>
-            {% else %}
-                <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 5px;">
-                    <p>Для работы с базой знаний необходимо <a href="/lab5/login">войти</a> или <a href="/lab5/register">зарегистрироваться</a>.</p>
-                </div>
+            {% if error %}
+                <div class="error">{{ error }}</div>
             {% endif %}
+            
+            <form method="post">
+                <div>
+                    <label>
+                        Название статьи:
+                        <input type="text" maxlength="50" name="title" required>
+                    </label>
+                </div>
+
+                <div>
+                    <label>
+                        Текст статьи:
+                        <textarea name="article_text" required></textarea>
+                    </label>
+                </div>
+
+                <div>
+                    <button type="submit">Готово</button>
+                </div>
+            </form>
+            
+            <div class="links">
+                <a href="/lab5">Назад к главной</a>
+            </div>
         </main>
 
         <footer>
