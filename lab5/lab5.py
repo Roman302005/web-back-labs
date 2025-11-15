@@ -31,24 +31,57 @@ def db_connect():
             password='123'
         )
         cur = conn.cursor(cursor_factory=RealDictCursor)
+        print("✅ Подключение к PostgreSQL")
     else:
         # SQLite подключение - АБСОЛЮТНЫЙ путь для PythonAnywhere
-        import os
-        # Сначала пробуем относительный путь (для локальной разработки)
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        db_path_relative = os.path.join(current_dir, "database.db")
+        db_path = '/home/Roman303030/web-back-labs/database.db'
         
-        # Если файла нет по относительному пути, используем абсолютный для PythonAnywhere
-        if os.path.exists(db_path_relative):
-            db_path = db_path_relative
-        else:
-            db_path = '/home/Roman303030/web-back-labs/database.db'
+        print(f"🔄 Пытаюсь подключиться к SQLite: {db_path}")
+        print(f"📁 Файл существует: {os.path.exists(db_path)}")
         
-        print(f"Подключаюсь к базе: {db_path}")  # Для отладки в логах
-        
-        conn = sqlite3.connect(db_path)
-        conn.row_factory = sqlite3.Row  # Для доступа к полям по имени как в PostgreSQL
-        cur = conn.cursor()
+        try:
+            conn = sqlite3.connect(db_path)
+            conn.row_factory = sqlite3.Row
+            cur = conn.cursor()
+            
+            # АВТОМАТИЧЕСКИ создаем таблицы если их нет
+            print("🔧 Проверяем и создаем таблицы если нужно...")
+            
+            # Таблица users
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS users (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    login VARCHAR(30) UNIQUE NOT NULL,
+                    password VARCHAR(200) NOT NULL
+                )
+            """)
+            
+            # Таблица articles
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS articles (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL,
+                    title VARCHAR(50),
+                    article_text TEXT,
+                    is_favorite BOOLEAN DEFAULT 0,
+                    is_public BOOLEAN DEFAULT 1,
+                    likes INTEGER DEFAULT 0,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users (id)
+                )
+            """)
+            
+            conn.commit()
+            
+            # Проверим таблицы
+            cur.execute("SELECT name FROM sqlite_master WHERE type='table';")
+            tables = cur.fetchall()
+            print(f"📊 Таблицы в базе: {tables}")
+            
+            print("✅ Подключение к SQLite успешно, таблицы созданы/проверены")
+        except Exception as e:
+            print(f"❌ Ошибка подключения к SQLite: {e}")
+            raise
     
     return conn, cur
 
@@ -60,6 +93,8 @@ def db_close(conn, cur):
 def execute_query(cur, query, params):
     """Универсальная функция выполнения запроса для разных БД"""
     db_type = current_app.config.get('DB_TYPE', 'postgres')
+    print(f"🔍 Выполняю запрос: {query} с параметрами: {params}")
+    
     if db_type == 'postgres':
         cur.execute(query.replace('?', '%s'), params)
     else:
@@ -79,6 +114,8 @@ def register():
     login = request.form.get('login')
     password = request.form.get('password')
     
+    print(f"📨 Получены данные для регистрации: login={login}")
+    
     if not (login and password):
         return render_template('lab5/register.html', error='Заполните все поля')
     
@@ -87,20 +124,25 @@ def register():
         
         # Проверяем существование пользователя
         execute_query(cur, "SELECT login FROM users WHERE login=?;", (login,))
-        if cur.fetchone():
+        existing_user = cur.fetchone()
+        print(f"👤 Проверка пользователя: {existing_user}")
+        
+        if existing_user:
             db_close(conn, cur)
             return render_template('lab5/register.html', error='Такой пользователь уже существует')
         
         password_hash = generate_password_hash(password)
+        print(f"🔐 Хеш пароля создан")
         
         # Добавляем пользователя
         execute_query(cur, "INSERT INTO users (login, password) VALUES (?, ?);", (login, password_hash))
+        print(f"✅ Пользователь добавлен в БД")
         
         db_close(conn, cur)
         return render_template('lab5/success.html', login=login)
     
     except Exception as e:
-        print(f"Ошибка: {e}")
+        print(f"❌ Ошибка при регистрации: {e}")
         traceback.print_exc()
         return render_template('lab5/register.html', error=f'Ошибка при регистрации: {str(e)}')
 
@@ -113,6 +155,8 @@ def login():
     login = request.form.get('login')
     password = request.form.get('password')
     
+    print(f"📨 Получены данные для входа: login={login}")
+    
     if not (login and password):
         return render_template('lab5/login.html', error='Заполните все поля')
     
@@ -122,6 +166,7 @@ def login():
         # Ищем пользователя в БД
         execute_query(cur, "SELECT * FROM users WHERE login=?;", (login,))
         user = cur.fetchone()
+        print(f"👤 Найден пользователь: {user is not None}")
         
         if not user:
             db_close(conn, cur)
@@ -138,16 +183,19 @@ def login():
         session['user_id'] = user['id']
         db_close(conn, cur)
         
+        print(f"✅ Успешный вход пользователя: {login}")
         return render_template('lab5/success_login.html', login=login)
     
     except Exception as e:
-        print(f"Ошибка: {e}")
+        print(f"❌ Ошибка при входе: {e}")
         traceback.print_exc()
         return render_template('lab5/login.html', error=f'Ошибка при входе: {str(e)}')
 
 # Выход из системы
 @lab5.route('/lab5/logout')
 def logout():
+    login = session.get('login')
+    print(f"🚪 Выход пользователя: {login}")
     session.pop('login', None)
     session.pop('user_id', None)
     return redirect(url_for('lab5.lab'))
@@ -165,6 +213,8 @@ def create():
     title = request.form.get('title')
     article_text = request.form.get('article_text')
     
+    print(f"📝 Создание статьи пользователем: {login}, заголовок: {title}")
+    
     if not (title and article_text):
         return render_template('lab5/create_article.html', error='Заполните все поля')
     
@@ -181,10 +231,11 @@ def create():
                      (user_id, title, article_text, True))
         
         db_close(conn, cur)
+        print(f"✅ Статья создана пользователем: {login}")
         return redirect('/lab5')
     
     except Exception as e:
-        print(f"Ошибка: {e}")
+        print(f"❌ Ошибка при создании статьи: {e}")
         traceback.print_exc()
         return render_template('lab5/create_article.html', error=f'Ошибка при создании статьи: {str(e)}')
 
@@ -194,6 +245,8 @@ def list_articles():
     login = session.get('login')
     if not login:
         return redirect('/lab5/login')
+    
+    print(f"📚 Запрос списка статей пользователя: {login}")
     
     try:
         conn, cur = db_connect()
@@ -208,9 +261,10 @@ def list_articles():
         articles = cur.fetchall()
         
         db_close(conn, cur)
+        print(f"✅ Найдено статей: {len(articles)}")
         return render_template('lab5/articles.html', articles=articles, login=login)
     
     except Exception as e:
-        print(f"Ошибка: {e}")
+        print(f"❌ Ошибка при загрузке статей: {e}")
         traceback.print_exc()
         return render_template('lab5/articles.html', articles=[], error=f'Ошибка при загрузке статей: {str(e)}')
