@@ -8,8 +8,10 @@ from lab3.lab3 import lab3
 from lab4.lab4 import lab4
 from lab5.lab5 import lab5
 request_log = deque(maxlen=20)
-
+from dotenv import load_dotenv
 app = Flask(__name__)
+
+load_dotenv()
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'секретно-секретный-секрет')
 app.config['DB_TYPE'] = os.getenv('DB_TYPE', 'postgres')
@@ -125,7 +127,7 @@ def main():
                 <a href="/lab2">Лабораторная работа 2</a>
                <a href="/lab3/">Лабораторная работа 3</a>
                <a href="/lab4/">Лабораторная работа 4</a>
-               <a href="/lab5/">Лабораторная работа 5</a>
+               <a href="/lab5">Лабораторная работа 5</a>
             </div>
 
             <div class="lab-section">
