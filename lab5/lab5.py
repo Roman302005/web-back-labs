@@ -32,9 +32,20 @@ def db_connect():
         )
         cur = conn.cursor(cursor_factory=RealDictCursor)
     else:
-        # SQLite подключение
-        dir_path = path.dirname(path.realpath(__file__))
-        db_path = path.join(dir_path, "database.db")
+        # SQLite подключение - АБСОЛЮТНЫЙ путь для PythonAnywhere
+        import os
+        # Сначала пробуем относительный путь (для локальной разработки)
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        db_path_relative = os.path.join(current_dir, "database.db")
+        
+        # Если файла нет по относительному пути, используем абсолютный для PythonAnywhere
+        if os.path.exists(db_path_relative):
+            db_path = db_path_relative
+        else:
+            db_path = '/home/Roman303030/web-back-labs/database.db'
+        
+        print(f"Подключаюсь к базе: {db_path}")  # Для отладки в логах
+        
         conn = sqlite3.connect(db_path)
         conn.row_factory = sqlite3.Row  # Для доступа к полям по имени как в PostgreSQL
         cur = conn.cursor()
@@ -116,18 +127,15 @@ def login():
             db_close(conn, cur)
             return render_template('lab5/login.html', error='Логин и/или пароль неверны')
         
-        # Для SQLite получаем данные по-разному
-        if current_app.config.get('DB_TYPE') == 'postgres':
-            user_password = user['password']
-        else:
-            user_password = user['password']
+        # Получаем пароль (работает для обеих БД благодаря row_factory)
+        user_password = user['password']
         
         if not check_password_hash(user_password, password):
             db_close(conn, cur)
             return render_template('lab5/login.html', error='Логин и/или пароль неверны')
         
         session['login'] = login
-        session['user_id'] = user['id'] if 'id' in user else user[0]
+        session['user_id'] = user['id']
         db_close(conn, cur)
         
         return render_template('lab5/success_login.html', login=login)
@@ -166,7 +174,7 @@ def create():
         # Получаем ID пользователя
         execute_query(cur, "SELECT id FROM users WHERE login=?;", (login,))
         user = cur.fetchone()
-        user_id = user['id'] if 'id' in user else user[0]
+        user_id = user['id']
         
         # Вставляем статью в базу
         execute_query(cur, "INSERT INTO articles (user_id, title, article_text, is_public) VALUES (?, ?, ?, ?);", 
@@ -193,7 +201,7 @@ def list_articles():
         # Получаем ID пользователя
         execute_query(cur, "SELECT id FROM users WHERE login=?;", (login,))
         user = cur.fetchone()
-        user_id = user['id'] if 'id' in user else user[0]
+        user_id = user['id']
         
         # Получаем все статьи пользователя
         execute_query(cur, "SELECT * FROM articles WHERE user_id=?;", (user_id,))
