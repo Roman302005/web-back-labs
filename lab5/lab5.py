@@ -95,7 +95,7 @@ def login():
         print(f"Ошибка: {e}")
         traceback.print_exc()
         return render_template('lab5/login.html', error=f'Ошибка при входе: {str(e)}')
-
+   
 # Выход из системы
 @lab5.route('/lab5/logout')
 def logout():
