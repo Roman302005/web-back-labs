@@ -3,18 +3,27 @@ import json
 
 lab6 = Blueprint('lab6', __name__)
 
-# Список офисов
+# Список офисов с разной стоимостью аренды
 offices = []
 for i in range(1, 11):
     offices.append({
         'number': i,
-        'tenant': ''
+        'tenant': '',
+        'price': 900 + i % 3  # Стоимость: 900, 901, 902, 900, 901, 902 и т.д.
     })
 
 @lab6.route('/lab6/')
 def main():
     login = session.get('login')
-    return render_template('lab6/lab6.html', login=login)
+    
+    # Вычисляем общую стоимость арендованных пользователем офисов
+    total_cost = 0
+    if login:
+        for office in offices:
+            if office['tenant'] == login:
+                total_cost += office['price']
+    
+    return render_template('lab6/lab6.html', login=login, total_cost=total_cost)
 
 @lab6.route('/lab6/json-rpc-api/', methods=['POST'])
 def api():

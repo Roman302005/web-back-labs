@@ -8,6 +8,15 @@
     {% if login %}
         <p>Вы вошли как: <strong>{{ login }}</strong></p>
         <a href="/lab5/logout">Выйти</a>
+        
+        {% if total_cost > 0 %}
+            <div style="margin: 15px 0; padding: 15px; background: #e8f4f8; border-radius: 5px; border-left: 4px solid #3498db;">
+                <h3>💰 Ваши текущие расходы на аренду:</h3>
+                <p style="font-size: 1.2em; font-weight: bold; color: #2c3e50;">
+                    Общая стоимость: {{ total_cost }} руб./мес.
+                </p>
+            </div>
+        {% endif %}
     {% else %}
         <p>Для бронирования офиса необходимо <a href="/lab5/login">авторизоваться</a></p>
     {% endif %}
@@ -16,6 +25,11 @@
     <div id="loading">Загрузка списка офисов...</div>
     <ul id="office-list" style="list-style: none; padding: 0;"></ul>
     <div id="error-message" style="color: red; display: none;"></div>
+
+    <div id="total-cost-display" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px; display: none;">
+        <h3>💰 Общая стоимость вашей аренды:</h3>
+        <p id="total-cost-text" style="font-size: 1.2em; font-weight: bold; color: #2c3e50;"></p>
+    </div>
 {% endblock %}
 
 {% block script %}
@@ -40,6 +54,8 @@
             const officeList = document.getElementById('office-list');
             const loading = document.getElementById('loading');
             const errorMessage = document.getElementById('error-message');
+            const totalCostDisplay = document.getElementById('total-cost-display');
+            const totalCostText = document.getElementById('total-cost-text');
             
             loading.style.display = 'none';
             errorMessage.style.display = 'none';
@@ -53,6 +69,8 @@
 
             if (data.result) {
                 officeList.innerHTML = '';
+                let userTotalCost = 0;
+                const userLogin = '{{ login }}';
                 
                 data.result.forEach(function(office) {
                     const li = document.createElement('li');
@@ -61,6 +79,11 @@
                     li.style.border = '1px solid #ddd';
                     li.style.borderRadius = '5px';
                     li.style.backgroundColor = '#f9f9f9';
+                    
+                    // Вычисляем общую стоимость для текущего пользователя
+                    if (office.tenant === userLogin) {
+                        userTotalCost += office.price;
+                    }
                     
                     let statusText = office.tenant ? 
                         `<span style="color: #e74c3c;">Арендован: ${office.tenant}</span>` : 
@@ -74,7 +97,7 @@
                                 style="margin-left: 10px; padding: 8px 15px; background: #3498db; color: white; border: none; border-radius: 3px; cursor: pointer;">
                                 Забронировать
                             </button>`;
-                    } else if (office.tenant === '{{ login }}') {
+                    } else if (office.tenant === userLogin) {
                         // Офис арендован текущим пользователем - кнопка освобождения
                         buttons = `
                             <button onclick="cancellation(${office.number})" 
@@ -88,10 +111,20 @@
                     
                     li.innerHTML = `
                         <strong>Кабинет №${office.number}</strong> - ${statusText}
+                        <br>
+                        <span style="color: #2c3e50; font-weight: bold;">💵 Стоимость: ${office.price} руб./мес.</span>
                         ${buttons}
                     `;
                     officeList.appendChild(li);
                 });
+                
+                // Показываем общую стоимость если пользователь авторизован и есть аренда
+                if (userLogin && userTotalCost > 0) {
+                    totalCostText.textContent = `Общая стоимость: ${userTotalCost} руб./мес.`;
+                    totalCostDisplay.style.display = 'block';
+                } else {
+                    totalCostDisplay.style.display = 'none';
+                }
             }
         })
         .catch(function(error) {
