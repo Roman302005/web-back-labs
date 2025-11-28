@@ -17,6 +17,20 @@ def init_db():
             'password': generate_password_hash('admin123'),
             'is_admin': True
         }
+    
+    # Добавляем тестовых пользователей для демонстрации
+    test_users = [
+        {'login': 'alex', 'password': '123'},
+        {'login': 'maria', 'password': '123'},
+        {'login': 'ivan', 'password': '123'}
+    ]
+    
+    for user in test_users:
+        if user['login'] not in users_db:
+            users_db[user['login']] = {
+                'password': generate_password_hash(user['password']),
+                'is_admin': False
+            }
 
 init_db()
 
@@ -49,21 +63,31 @@ def main():
     if not login:
         return render_template('rgz/rgz.html')
     
+    # Для отладки - выводим всех пользователей в консоль
+    print("Все пользователи в системе:", list(users_db.keys()))
+    print("Текущий пользователь:", login)
+    
     # Для обычных пользователей - список пользователей
     if not is_admin():
-        other_users = [user for user in users_db.keys() if user != login and user != admin_login]
+        # Показываем всех пользователей кроме текущего
+        other_users = [user for user in users_db.keys() if user != login]
+        print("Пользователи для отображения:", other_users)
+        
         return render_template('rgz/rgz.html', 
                              login=login, 
                              users=other_users,
-                             users_db_size=len(users_db))
+                             users_db_size=len(users_db),
+                             all_users=list(users_db.keys()))
     
     # Для администратора - управление пользователями
     return render_template('rgz/rgz.html', 
                          login=login, 
                          users=users_db, 
                          is_admin=True,
-                         users_db_size=len(users_db))
+                         users_db_size=len(users_db),
+                         all_users=list(users_db.keys()))
 
+# Остальные функции остаются без изменений...
 @rgz.route('/rgz/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'GET':
