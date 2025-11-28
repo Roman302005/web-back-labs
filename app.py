@@ -7,6 +7,7 @@ from lab2.lab2 import lab2
 from lab3.lab3 import lab3
 from lab4.lab4 import lab4
 from lab5.lab5 import lab5
+from lab6.lab6 import lab6
 request_log = deque(maxlen=20)
 from dotenv import load_dotenv
 app = Flask(__name__)
@@ -21,6 +22,7 @@ app.register_blueprint(lab2)
 app.register_blueprint(lab3)
 app.register_blueprint(lab4)
 app.register_blueprint(lab5)
+app.register_blueprint(lab6)
 
 app.secret_key = 'секретно-секретный секрет'
 
@@ -128,6 +130,7 @@ def main():
                <a href="/lab3/">Лабораторная работа 3</a>
                <a href="/lab4/">Лабораторная работа 4</a>
                <a href="/lab5">Лабораторная работа 5</a>
+               <a href="/lab6">Лабораторная работа 6</a>
             </div>
 
             <div class="lab-section">

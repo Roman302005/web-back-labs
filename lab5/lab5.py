@@ -18,53 +18,61 @@ except ImportError:
 lab5 = Blueprint('lab5', __name__)
 
 def db_connect():
-    db_type = current_app.config.get('DB_TYPE', 'postgres')
+    db_type = current_app.config.get('DB_TYPE', 'sqlite')  # По умолчанию используем SQLite
     
     if db_type == 'postgres':
-        conn = psycopg2.connect(
-            host='127.0.0.1',
-            database='roma',
-            user='roma',
-            password='123'
-        )
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-    else:
-        db_path = '/home/Roman303030/web-back-labs/database.db'
-        
         try:
-            conn = sqlite3.connect(db_path)
-            conn.row_factory = sqlite3.Row
-            cur = conn.cursor()
-            
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS users (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    login VARCHAR(30) UNIQUE NOT NULL,
-                    password VARCHAR(200) NOT NULL
-                )
-            """)
-            
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS articles (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user_id INTEGER NOT NULL,
-                    title VARCHAR(50),
-                    article_text TEXT,
-                    is_favorite BOOLEAN DEFAULT 0,
-                    is_public BOOLEAN DEFAULT 1,
-                    likes INTEGER DEFAULT 0,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (user_id) REFERENCES users (id)
-                )
-            """)
-            
-            conn.commit()
-            
+            conn = psycopg2.connect(
+                host='127.0.0.1',
+                database='roma',
+                user='roma',
+                password='123'
+            )
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            return conn, cur
         except Exception as e:
-            print(f"Ошибка подключения к SQLite: {e}")
-            raise
+            print(f"Ошибка подключения к PostgreSQL: {e}")
+            print("Переключаемся на SQLite")
+            # Если PostgreSQL недоступен, переключаемся на SQLite
+            db_type = 'sqlite'
     
-    return conn, cur
+    # Используем SQLite
+    db_path = path.join(path.dirname(path.abspath(__file__)), '..', 'database.db')
+    
+    try:
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        
+        # Создаем таблицы если их нет
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                login VARCHAR(30) UNIQUE NOT NULL,
+                password VARCHAR(200) NOT NULL
+            )
+        """)
+        
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS articles (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                title VARCHAR(50),
+                article_text TEXT,
+                is_favorite BOOLEAN DEFAULT 0,
+                is_public BOOLEAN DEFAULT 1,
+                likes INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users (id)
+            )
+        """)
+        
+        conn.commit()
+        return conn, cur
+        
+    except Exception as e:
+        print(f"Ошибка подключения к SQLite: {e}")
+        raise
 
 def db_close(conn, cur):
     conn.commit()
@@ -72,7 +80,7 @@ def db_close(conn, cur):
     conn.close()
 
 def execute_query(cur, query, params):
-    db_type = current_app.config.get('DB_TYPE', 'postgres')
+    db_type = current_app.config.get('DB_TYPE', 'sqlite')
     if db_type == 'postgres':
         cur.execute(query.replace('?', '%s'), params)
     else:
@@ -159,6 +167,7 @@ def logout():
     session.pop('user_id', None)
     return redirect(url_for('lab5.lab'))
 
+# Остальные функции create, list_articles, edit_article, delete_article остаются без изменений
 @lab5.route('/lab5/create', methods=['GET', 'POST'])
 def create():
     login = session.get('login')
