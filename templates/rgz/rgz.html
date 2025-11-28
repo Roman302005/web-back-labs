@@ -35,6 +35,11 @@
         <p>Вы вошли как: <strong>{{ login }}</strong></p>
         <a href="/rgz/logout">Выйти</a>
 
+        <!-- Отладочная информация -->
+        <div style="background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 5px;">
+            <small>Отладка: Всего пользователей в системе: {{ users_db_size }}, Показано: {{ users|length }}</small>
+        </div>
+
         {% if is_admin %}
             <h2>👑 Панель администратора - Управление пользователями</h2>
             <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
@@ -65,16 +70,24 @@
             </table>
         {% else %}
             <h2>👥 Список пользователей</h2>
-            <ul style="list-style: none; padding: 0;">
-                {% for user in users %}
-                    <li style="padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px;">
-                        <strong>{{ user }}</strong>
-                        <a href="/rgz/chat/{{ user }}" style="float: right; padding: 5px 10px; background: #3498db; color: white; text-decoration: none; border-radius: 3px;">
-                            💬 Написать сообщение
-                        </a>
-                    </li>
-                {% endfor %}
-            </ul>
+            
+            {% if users %}
+                <ul style="list-style: none; padding: 0;">
+                    {% for user in users %}
+                        <li style="padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px;">
+                            <strong>{{ user }}</strong>
+                            <a href="/rgz/chat/{{ user }}" style="float: right; padding: 5px 10px; background: #3498db; color: white; text-decoration: none; border-radius: 3px;">
+                                💬 Написать сообщение
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div style="text-align: center; padding: 20px; background: #fff3cd; border-radius: 5px;">
+                    <p>😔 В системе пока нет других пользователей</p>
+                    <p>Попросите кого-нибудь зарегистрироваться, чтобы начать общение!</p>
+                </div>
+            {% endif %}
         {% endif %}
     {% endif %}
 {% endblock %}

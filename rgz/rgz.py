@@ -52,10 +52,17 @@ def main():
     # Для обычных пользователей - список пользователей
     if not is_admin():
         other_users = [user for user in users_db.keys() if user != login and user != admin_login]
-        return render_template('rgz/rgz.html', login=login, users=other_users)
+        return render_template('rgz/rgz.html', 
+                             login=login, 
+                             users=other_users,
+                             users_db_size=len(users_db))
     
     # Для администратора - управление пользователями
-    return render_template('rgz/rgz.html', login=login, users=users_db, is_admin=True)
+    return render_template('rgz/rgz.html', 
+                         login=login, 
+                         users=users_db, 
+                         is_admin=True,
+                         users_db_size=len(users_db))
 
 @rgz.route('/rgz/register', methods=['GET', 'POST'])
 def register():
