@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block lab %}RGZ - Чат с {{ chat_with }}{% endblock %}
+
+{% block main %}
+    <h1>💬 Чат с {{ chat_with }}</h1>
+    
+    <p><a href="/rgz">← Назад к списку пользователей</a></p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}" style="padding: 10px; margin: 10px 0; border-radius: 5px; 
+                    {% if category == 'error' %}background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;
+                    {% elif category == 'success' %}background: #d4edda; color: #155724; border: 1px solid #c3e6cb;
+                    {% else %}background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb;{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div style="border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin-bottom: 20px; max-height: 400px; overflow-y: auto;">
+        {% if messages %}
+            {% for msg in messages %}
+                {% if not (msg.deleted_by_sender and msg.from_user == login) and not (msg.deleted_by_receiver and msg.to_user == login) %}
+                    <div style="margin-bottom: 15px; padding: 10px; border-radius: 5px; 
+                        {% if msg.from_user == login %}background: #d4edda; text-align: right;{% else %}background: #f8f9fa;{% endif %}">
+                        <div><strong>{{ msg.from_user }}</strong> 
+                            <small style="color: #666;">{{ msg.timestamp.strftime('%H:%M %d.%m.%Y') }}</small>
+                            {% if msg.from_user == login or msg.to_user == login %}
+                                <a href="/rgz/delete_message/{{ msg.id }}" style="color: #e74c3c; margin-left: 10px; text-decoration: none;" 
+                                   onclick="return confirm('Удалить сообщение?')">🗑️</a>
+                            {% endif %}
+                        </div>
+                        <div>{{ msg.message }}</div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <p style="text-align: center; color: #666;">Нет сообщений. Начните общение!</p>
+        {% endif %}
+    </div>
+
+    <form method="post" action="/rgz/send_message">
+        <input type="hidden" name="to_user" value="{{ chat_with }}">
+        <div style="display: flex; gap: 10px;">
+            <input type="text" name="message" required placeholder="Введите сообщение..." 
+                   style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            <button type="submit" style="padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                Отправить
+            </button>
+        </div>
+    </form>
+{% endblock %}
