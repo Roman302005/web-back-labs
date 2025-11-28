@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, session, jsonify
+from flask import Blueprint, render_template, request, session
 import json
 
 lab6 = Blueprint('lab6', __name__)
@@ -17,122 +17,123 @@ def main():
     return render_template('lab6/lab6.html', login=login)
 
 @lab6.route('/lab6/json-rpc-api/', methods=['POST'])
-def json_rpc_api():
-    data = request.get_json()
-    
-    if not data:
-        return json.dumps({
-            'jsonrpc': '2.0',
-            'error': {
-                'code': -32700,
-                'message': 'Parse error'
-            },
-            'id': None
-        })
-    
+def api():
+    data = request.json
     method = data.get('method')
     params = data.get('params')
     id = data.get('id')
     
     if method == 'info':
-        return json.dumps({
+        # Возвращаем информацию о всех офисах
+        return {
             'jsonrpc': '2.0',
             'result': offices,
             'id': id
-        })
+        }
     
     elif method == 'booking':
-        # Проверка авторизации через вашу существующую систему
-        if 'login' not in session or not session['login']:
-            return json.dumps({
+        # Проверка авторизации
+        login = session.get('login')
+        if not login:
+            return {
                 'jsonrpc': '2.0',
                 'error': {
                     'code': 1,
                     'message': 'Unauthorized'
                 },
                 'id': id
-            })
+            }
         
         office_number = params
-        login = session['login']
-        
+        # Бронирование офиса
         for office in offices:
             if office['number'] == office_number:
                 if office['tenant'] != '':
-                    return json.dumps({
+                    return {
                         'jsonrpc': '2.0',
                         'error': {
                             'code': 2,
                             'message': 'Already booked'
                         },
                         'id': id
-                    })
+                    }
                 
                 office['tenant'] = login
-                return json.dumps({
+                return {
                     'jsonrpc': '2.0',
                     'result': 'success',
                     'id': id
-                })
+                }
         
-        return json.dumps({
+        return {
             'jsonrpc': '2.0',
             'error': {
                 'code': 3,
                 'message': 'Office not found'
             },
             'id': id
-        })
+        }
     
     elif method == 'cancellation':
-        # Проверка авторизации через вашу существующую систему
-        if 'login' not in session or not session['login']:
-            return json.dumps({
+        # Проверка авторизации
+        login = session.get('login')
+        if not login:
+            return {
                 'jsonrpc': '2.0',
                 'error': {
                     'code': 1,
                     'message': 'Unauthorized'
                 },
                 'id': id
-            })
+            }
         
         office_number = params
-        login = session['login']
-        
+        # Снятие аренды офиса
         for office in offices:
             if office['number'] == office_number:
-                if office['tenant'] == login:
-                    office['tenant'] = ''
-                    return json.dumps({
+                if office['tenant'] == '':
+                    return {
                         'jsonrpc': '2.0',
-                        'result': 'success',
+                        'error': {
+                            'code': 5,
+                            'message': 'Office is not booked'
+                        },
                         'id': id
-                    })
-                elif office['tenant'] != '':
-                    return json.dumps({
+                    }
+                elif office['tenant'] != login:
+                    return {
                         'jsonrpc': '2.0',
                         'error': {
                             'code': 4,
                             'message': 'Not your booking'
                         },
                         'id': id
-                    })
+                    }
+                else:
+                    # Снимаем аренду
+                    office['tenant'] = ''
+                    return {
+                        'jsonrpc': '2.0',
+                        'result': 'success',
+                        'id': id
+                    }
         
-        return json.dumps({
+        return {
             'jsonrpc': '2.0',
             'error': {
                 'code': 3,
                 'message': 'Office not found'
             },
             'id': id
-        })
+        }
     
     else:
-        return json.dumps({
+        # Метод не найден
+        return {
             'jsonrpc': '2.0',
             'error': {
                 'code': -32601,
                 'message': 'Method not found'
             },
             'id': id
-        })
+        }

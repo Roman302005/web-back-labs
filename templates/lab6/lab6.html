@@ -13,7 +13,9 @@
     {% endif %}
 
     <h2>Список кабинетов</h2>
-    <ul id="office-list"></ul>
+    <div id="loading">Загрузка списка офисов...</div>
+    <ul id="office-list" style="list-style: none; padding: 0;"></ul>
+    <div id="error-message" style="color: red; display: none;"></div>
 {% endblock %}
 
 {% block script %}
@@ -36,31 +38,69 @@
         })
         .then(function(data) {
             const officeList = document.getElementById('office-list');
-            officeList.innerHTML = '';
+            const loading = document.getElementById('loading');
+            const errorMessage = document.getElementById('error-message');
+            
+            loading.style.display = 'none';
+            errorMessage.style.display = 'none';
+            errorMessage.textContent = '';
+            
+            if (data.error) {
+                errorMessage.textContent = 'Ошибка: ' + data.error.message;
+                errorMessage.style.display = 'block';
+                return;
+            }
 
             if (data.result) {
+                officeList.innerHTML = '';
+                
                 data.result.forEach(function(office) {
                     const li = document.createElement('li');
                     li.style.margin = '10px 0';
-                    li.style.padding = '10px';
+                    li.style.padding = '15px';
                     li.style.border = '1px solid #ddd';
                     li.style.borderRadius = '5px';
+                    li.style.backgroundColor = '#f9f9f9';
+                    
+                    let statusText = office.tenant ? 
+                        `<span style="color: #e74c3c;">Арендован: ${office.tenant}</span>` : 
+                        '<span style="color: #27ae60;">Свободен</span>';
                     
                     let buttons = '';
                     if (!office.tenant) {
-                        buttons = `<button onclick="booking(${office.number})" style="margin-left: 10px; padding: 5px 10px; background: #3498db; color: white; border: none; border-radius: 3px; cursor: pointer;">Забронировать</button>`;
+                        // Свободный офис - кнопка бронирования
+                        buttons = `
+                            <button onclick="booking(${office.number})" 
+                                style="margin-left: 10px; padding: 8px 15px; background: #3498db; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                                Забронировать
+                            </button>`;
                     } else if (office.tenant === '{{ login }}') {
-                        buttons = `<button onclick="cancellation(${office.number})" style="margin-left: 10px; padding: 5px 10px; background: #e74c3c; color: white; border: none; border-radius: 3px; cursor: pointer;">Отменить бронь</button>`;
+                        // Офис арендован текущим пользователем - кнопка освобождения
+                        buttons = `
+                            <button onclick="cancellation(${office.number})" 
+                                style="margin-left: 10px; padding: 8px 15px; background: #e74c3c; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                                Освободить
+                            </button>`;
+                    } else {
+                        // Офис арендован другим пользователем - нет кнопок
+                        buttons = `<span style="margin-left: 10px; color: #7f8c8d;">(занято другим пользователем)</span>`;
                     }
                     
                     li.innerHTML = `
-                        Кабинет №${office.number} 
-                        ${office.tenant ? ` - <strong>Арендован: ${office.tenant}</strong>` : ' - Свободен'}
+                        <strong>Кабинет №${office.number}</strong> - ${statusText}
                         ${buttons}
                     `;
                     officeList.appendChild(li);
                 });
             }
+        })
+        .catch(function(error) {
+            const errorMessage = document.getElementById('error-message');
+            const loading = document.getElementById('loading');
+            
+            loading.style.display = 'none';
+            errorMessage.textContent = 'Ошибка загрузки: ' + error.message;
+            errorMessage.style.display = 'block';
         });
     }
 
@@ -90,16 +130,19 @@
                     case 2:
                         alert('Офис уже арендуется');
                         break;
-                    case -32601:
-                        alert('Странная ошибка');
+                    case 3:
+                        alert('Офис не найден');
                         break;
                     default:
                         alert('Произошла ошибка: ' + data.error.message);
                 }
             } else {
-                document.getElementById('office-list').innerHTML = '';
+                // Успешное бронирование - обновляем список
                 getOfficeList();
             }
+        })
+        .catch(function(error) {
+            alert('Ошибка при бронировании: ' + error.message);
         });
     }
 
@@ -129,13 +172,23 @@
                     case 4:
                         alert('Это не ваша бронь');
                         break;
+                    case 5:
+                        alert('Офис не арендован');
+                        break;
+                    case 3:
+                        alert('Офис не найден');
+                        break;
                     default:
                         alert('Произошла ошибка: ' + data.error.message);
                 }
             } else {
-                document.getElementById('office-list').innerHTML = '';
+                // Успешное снятие аренды - обновляем список
                 getOfficeList();
+                alert('Офис успешно освобожден!');
             }
+        })
+        .catch(function(error) {
+            alert('Ошибка при освобождении офиса: ' + error.message);
         });
     }
 
