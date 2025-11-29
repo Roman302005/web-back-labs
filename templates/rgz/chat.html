@@ -23,19 +23,18 @@
     <div style="border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin-bottom: 20px; max-height: 400px; overflow-y: auto;">
         {% if messages %}
             {% for msg in messages %}
-                {% if not (msg.deleted_by_sender and msg.from_user == login) and not (msg.deleted_by_receiver and msg.to_user == login) %}
-                    <div style="margin-bottom: 15px; padding: 10px; border-radius: 5px; 
-                        {% if msg.from_user == login %}background: #d4edda; text-align: right;{% else %}background: #f8f9fa;{% endif %}">
-                        <div><strong>{{ msg.from_user }}</strong> 
-                            <small style="color: #666;">{{ msg.timestamp.strftime('%H:%M %d.%m.%Y') }}</small>
-                            {% if msg.from_user == login or msg.to_user == login %}
-                                <a href="/rgz/delete_message/{{ msg.id }}" style="color: #e74c3c; margin-left: 10px; text-decoration: none;" 
-                                   onclick="return confirm('Удалить сообщение?')">🗑️</a>
-                            {% endif %}
-                        </div>
-                        <div>{{ msg.message }}</div>
+                <div style="margin-bottom: 15px; padding: 10px; border-radius: 5px; 
+                    {% if msg.from_user == login %}background: #d4edda; text-align: right;{% else %}background: #f8f9fa;{% endif %}">
+                    <div>
+                        <strong>{{ msg.from_user }}</strong> 
+                        <small style="color: #666;">{{ msg.timestamp }}</small>
+                        {% if msg.from_user == login or msg.to_user == login %}
+                            <a href="/rgz/delete_message/{{ msg.id }}" style="color: #e74c3c; margin-left: 10px; text-decoration: none;" 
+                               onclick="return confirm('Удалить сообщение?')">🗑️</a>
+                        {% endif %}
                     </div>
-                {% endif %}
+                    <div>{{ msg.message }}</div>
+                </div>
             {% endfor %}
         {% else %}
             <p style="text-align: center; color: #666;">Нет сообщений. Начните общение!</p>

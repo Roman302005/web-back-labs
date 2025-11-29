@@ -1,61 +1,121 @@
-from flask import Blueprint, render_template, request, session, redirect, url_for, flash
+from flask import Blueprint, render_template, request, session, redirect, url_for, flash, current_app
 import traceback
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime
 
+try:
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+except ImportError:
+    pass
+
+try:
+    import sqlite3
+except ImportError:
+    pass
+
 rgz = Blueprint('rgz', __name__)
 
-# Имитация базы данных в памяти
-users_db = {}
-messages_db = []
-admin_login = "admin"  # Логин администратора
-
-def init_db():
-    # Создаем администратора по умолчанию
-    if admin_login not in users_db:
-        users_db[admin_login] = {
-            'password': generate_password_hash('admin123'),
-            'is_admin': True
-        }
+def db_connect():
+    db_type = current_app.config.get('DB_TYPE', 'sqlite')
     
-    # Добавляем тестовых пользователей для демонстрации
-    test_users = [
-        {'login': 'alex', 'password': '123'},
-        {'login': 'maria', 'password': '123'},
-        {'login': 'ivan', 'password': '123'}
-    ]
+    if db_type == 'postgres':
+        try:
+            conn = psycopg2.connect(
+                host='127.0.0.1',
+                database='roma',
+                user='roma',
+                password='123'
+            )
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            return conn, cur
+        except Exception as e:
+            print(f"Ошибка подключения к PostgreSQL: {e}")
+            print("Переключаемся на SQLite")
+            db_type = 'sqlite'
     
-    for user in test_users:
-        if user['login'] not in users_db:
-            users_db[user['login']] = {
-                'password': generate_password_hash(user['password']),
-                'is_admin': False
-            }
+    # Используем SQLite
+    import os
+    from os import path
+    db_path = path.join(path.dirname(path.abspath(__file__)), '..', 'database.db')
+    
+    try:
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        
+        # Создаем таблицы для сообщений если их нет
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS rgz_messages (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                from_user VARCHAR(30) NOT NULL,
+                to_user VARCHAR(30) NOT NULL,
+                message TEXT NOT NULL,
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                deleted_by_sender BOOLEAN DEFAULT 0,
+                deleted_by_receiver BOOLEAN DEFAULT 0,
+                FOREIGN KEY (from_user) REFERENCES users (login),
+                FOREIGN KEY (to_user) REFERENCES users (login)
+            )
+        """)
+        
+        conn.commit()
+        return conn, cur
+        
+    except Exception as e:
+        print(f"Ошибка подключения к SQLite: {e}")
+        raise
 
-init_db()
+def db_close(conn, cur):
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def execute_query(cur, query, params):
+    db_type = current_app.config.get('DB_TYPE', 'sqlite')
+    if db_type == 'postgres':
+        cur.execute(query.replace('?', '%s'), params)
+    else:
+        cur.execute(query, params)
 
 def get_current_user():
     return session.get('login')
 
 def is_admin():
-    return get_current_user() == admin_login
+    return get_current_user() == 'admin'  # Администратор всегда с логином 'admin'
 
-def get_user_messages(username):
-    """Получить все сообщения пользователя (входящие и исходящие)"""
-    user_messages = []
-    for msg in messages_db:
-        if msg['to_user'] == username or msg['from_user'] == username:
-            user_messages.append(msg)
-    return user_messages
+def get_all_users():
+    """Получить всех пользователей из БД"""
+    try:
+        conn, cur = db_connect()
+        execute_query(cur, "SELECT login FROM users WHERE login != ?;", (get_current_user(),))
+        users = [row['login'] for row in cur.fetchall()]
+        db_close(conn, cur)
+        return users
+    except Exception as e:
+        print(f"Ошибка при получении пользователей: {e}")
+        return []
 
 def get_chat_messages(user1, user2):
     """Получить сообщения между двумя пользователями"""
-    chat_messages = []
-    for msg in messages_db:
-        if (msg['from_user'] == user1 and msg['to_user'] == user2) or \
-           (msg['from_user'] == user2 and msg['to_user'] == user1):
-            chat_messages.append(msg)
-    return sorted(chat_messages, key=lambda x: x['timestamp'])
+    try:
+        conn, cur = db_connect()
+        execute_query(cur, """
+            SELECT * FROM rgz_messages 
+            WHERE ((from_user = ? AND to_user = ?) OR (from_user = ? AND to_user = ?))
+            AND ((from_user = ? AND deleted_by_sender = 0) OR (to_user = ? AND deleted_by_receiver = 0))
+            ORDER BY timestamp;
+        """, (user1, user2, user2, user1, user1, user1))
+        
+        messages = []
+        for row in cur.fetchall():
+            messages.append(dict(row))
+        
+        db_close(conn, cur)
+        return messages
+    except Exception as e:
+        print(f"Ошибка при получении сообщений: {e}")
+        return []
 
 @rgz.route('/rgz')
 def main():
@@ -63,80 +123,39 @@ def main():
     if not login:
         return render_template('rgz/rgz.html')
     
-    # Для отладки - выводим всех пользователей в консоль
-    print("Все пользователи в системе:", list(users_db.keys()))
-    print("Текущий пользователь:", login)
+    # Получаем всех пользователей кроме текущего
+    users = get_all_users()
     
-    # Для обычных пользователей - список пользователей
-    if not is_admin():
-        # Показываем всех пользователей кроме текущего
-        other_users = [user for user in users_db.keys() if user != login]
-        print("Пользователи для отображения:", other_users)
-        
-        return render_template('rgz/rgz.html', 
-                             login=login, 
-                             users=other_users,
-                             users_db_size=len(users_db),
-                             all_users=list(users_db.keys()))
+    # Для администратора показываем специальный интерфейс
+    if is_admin():
+        try:
+            conn, cur = db_connect()
+            execute_query(cur, "SELECT login FROM users;", ())
+            all_users = [row['login'] for row in cur.fetchall()]
+            db_close(conn, cur)
+            return render_template('rgz/rgz.html', 
+                                 login=login, 
+                                 users=all_users, 
+                                 is_admin=True,
+                                 users_count=len(all_users))
+        except Exception as e:
+            print(f"Ошибка при получении всех пользователей: {e}")
+            return render_template('rgz/rgz.html', login=login, users=[], is_admin=True)
     
-    # Для администратора - управление пользователями
     return render_template('rgz/rgz.html', 
                          login=login, 
-                         users=users_db, 
-                         is_admin=True,
-                         users_db_size=len(users_db),
-                         all_users=list(users_db.keys()))
+                         users=users,
+                         users_count=len(users))
 
-# Остальные функции остаются без изменений...
 @rgz.route('/rgz/register', methods=['GET', 'POST'])
 def register():
-    if request.method == 'GET':
-        return render_template('rgz/register.html')
-    
-    login = request.form.get('login')
-    password = request.form.get('password')
-    
-    if not login or not password:
-        flash('Заполните все поля', 'error')
-        return render_template('rgz/register.html')
-    
-    if login in users_db:
-        flash('Пользователь с таким логином уже существует', 'error')
-        return render_template('rgz/register.html')
-    
-    # Регистрируем нового пользователя
-    users_db[login] = {
-        'password': generate_password_hash(password),
-        'is_admin': False
-    }
-    
-    flash('Регистрация прошла успешно! Теперь вы можете войти.', 'success')
-    return redirect('/rgz/login')
+    # Используем регистрацию из lab5
+    return redirect('/lab5/register')
 
 @rgz.route('/rgz/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'GET':
-        return render_template('rgz/login.html')
-    
-    login = request.form.get('login')
-    password = request.form.get('password')
-    
-    if not login or not password:
-        flash('Заполните все поля', 'error')
-        return render_template('rgz/login.html')
-    
-    if login not in users_db:
-        flash('Неверный логин или пароль', 'error')
-        return render_template('rgz/login.html')
-    
-    user_data = users_db[login]
-    if not check_password_hash(user_data['password'], password):
-        flash('Неверный логин или пароль', 'error')
-        return render_template('rgz/login.html')
-    
-    session['login'] = login
-    flash('Вы успешно вошли в систему!', 'success')
-    return redirect('/rgz')
+    # Используем вход из lab5
+    return redirect('/lab5/login')
 
 @rgz.route('/rgz/logout')
 def logout():
@@ -148,10 +167,21 @@ def logout():
 def chat(username):
     current_user = get_current_user()
     if not current_user:
-        return redirect('/rgz/login')
+        return redirect('/lab5/login')
     
-    if username not in users_db:
-        flash('Пользователь не найден', 'error')
+    # Проверяем существование пользователя
+    try:
+        conn, cur = db_connect()
+        execute_query(cur, "SELECT login FROM users WHERE login = ?;", (username,))
+        user_exists = cur.fetchone()
+        db_close(conn, cur)
+        
+        if not user_exists:
+            flash('Пользователь не найден', 'error')
+            return redirect('/rgz')
+    except Exception as e:
+        print(f"Ошибка при проверке пользователя: {e}")
+        flash('Ошибка при загрузке чата', 'error')
         return redirect('/rgz')
     
     chat_messages = get_chat_messages(current_user, username)
@@ -164,7 +194,7 @@ def chat(username):
 def send_message():
     current_user = get_current_user()
     if not current_user:
-        return redirect('/rgz/login')
+        return redirect('/lab5/login')
     
     to_user = request.form.get('to_user')
     message_text = request.form.get('message')
@@ -173,48 +203,68 @@ def send_message():
         flash('Заполните все поля', 'error')
         return redirect(f'/rgz/chat/{to_user}')
     
-    if to_user not in users_db:
-        flash('Пользователь не найден', 'error')
-        return redirect('/rgz')
+    # Сохраняем сообщение в БД
+    try:
+        conn, cur = db_connect()
+        execute_query(cur, """
+            INSERT INTO rgz_messages (from_user, to_user, message) 
+            VALUES (?, ?, ?);
+        """, (current_user, to_user, message_text))
+        
+        db_close(conn, cur)
+        flash('Сообщение отправлено!', 'success')
+    except Exception as e:
+        print(f"Ошибка при отправке сообщения: {e}")
+        flash('Ошибка при отправке сообщения', 'error')
     
-    # Сохраняем сообщение
-    messages_db.append({
-        'id': len(messages_db) + 1,
-        'from_user': current_user,
-        'to_user': to_user,
-        'message': message_text,
-        'timestamp': datetime.now(),
-        'deleted_by_sender': False,
-        'deleted_by_receiver': False
-    })
-    
-    flash('Сообщение отправлено!', 'success')
     return redirect(f'/rgz/chat/{to_user}')
 
 @rgz.route('/rgz/delete_message/<int:message_id>')
 def delete_message(message_id):
     current_user = get_current_user()
     if not current_user:
-        return redirect('/rgz/login')
+        return redirect('/lab5/login')
     
-    # Находим сообщение
-    for msg in messages_db:
-        if msg['id'] == message_id:
-            # Проверяем права на удаление
-            if msg['from_user'] == current_user:
-                msg['deleted_by_sender'] = True
-            elif msg['to_user'] == current_user:
-                msg['deleted_by_receiver'] = True
-            
-            # Если сообщение удалено обоими пользователями, удаляем полностью
-            if msg['deleted_by_sender'] and msg['deleted_by_receiver']:
-                messages_db.remove(msg)
-            
-            flash('Сообщение удалено', 'success')
-            return redirect(f'/rgz/chat/{msg["to_user"] if msg["from_user"] == current_user else msg["from_user"]}')
-    
-    flash('Сообщение не найдено', 'error')
-    return redirect('/rgz')
+    try:
+        conn, cur = db_connect()
+        
+        # Получаем информацию о сообщении
+        execute_query(cur, "SELECT * FROM rgz_messages WHERE id = ?;", (message_id,))
+        message = cur.fetchone()
+        
+        if not message:
+            flash('Сообщение не найдено', 'error')
+            return redirect('/rgz')
+        
+        message_dict = dict(message)
+        
+        # Определяем, кто удаляет сообщение
+        if message_dict['from_user'] == current_user:
+            # Удаляем для отправителя
+            execute_query(cur, "UPDATE rgz_messages SET deleted_by_sender = 1 WHERE id = ?;", (message_id,))
+            redirect_user = message_dict['to_user']
+        elif message_dict['to_user'] == current_user:
+            # Удаляем для получателя
+            execute_query(cur, "UPDATE rgz_messages SET deleted_by_receiver = 1 WHERE id = ?;", (message_id,))
+            redirect_user = message_dict['from_user']
+        else:
+            flash('Нет прав для удаления этого сообщения', 'error')
+            return redirect('/rgz')
+        
+        # Если сообщение удалено обоими пользователями, удаляем полностью
+        execute_query(cur, """
+            DELETE FROM rgz_messages 
+            WHERE id = ? AND deleted_by_sender = 1 AND deleted_by_receiver = 1;
+        """, (message_id,))
+        
+        db_close(conn, cur)
+        flash('Сообщение удалено', 'success')
+        return redirect(f'/rgz/chat/{redirect_user}')
+        
+    except Exception as e:
+        print(f"Ошибка при удалении сообщения: {e}")
+        flash('Ошибка при удалении сообщения', 'error')
+        return redirect('/rgz')
 
 @rgz.route('/rgz/admin/delete_user/<username>')
 def delete_user(username):
@@ -222,16 +272,25 @@ def delete_user(username):
         flash('Доступ запрещен', 'error')
         return redirect('/rgz')
     
-    if username == admin_login:
+    if username == 'admin':
         flash('Нельзя удалить администратора', 'error')
         return redirect('/rgz')
     
-    if username in users_db:
-        # Удаляем пользователя и все его сообщения
-        del users_db[username]
-        global messages_db
-        messages_db = [msg for msg in messages_db if msg['from_user'] != username and msg['to_user'] != username]
+    try:
+        conn, cur = db_connect()
+        
+        # Удаляем пользователя
+        execute_query(cur, "DELETE FROM users WHERE login = ?;", (username,))
+        
+        # Удаляем все сообщения пользователя
+        execute_query(cur, "DELETE FROM rgz_messages WHERE from_user = ? OR to_user = ?;", (username, username))
+        
+        db_close(conn, cur)
         flash(f'Пользователь {username} удален', 'success')
+        
+    except Exception as e:
+        print(f"Ошибка при удалении пользователя: {e}")
+        flash('Ошибка при удалении пользователя', 'error')
     
     return redirect('/rgz')
 
@@ -239,10 +298,6 @@ def delete_user(username):
 def edit_user(username):
     if not is_admin():
         flash('Доступ запрещен', 'error')
-        return redirect('/rgz')
-    
-    if username not in users_db:
-        flash('Пользователь не найден', 'error')
         return redirect('/rgz')
     
     if request.method == 'GET':
@@ -253,6 +308,14 @@ def edit_user(username):
         flash('Введите новый пароль', 'error')
         return render_template('rgz/edit_user.html', user_login=username)
     
-    users_db[username]['password'] = generate_password_hash(new_password)
-    flash('Пароль пользователя изменен', 'success')
+    try:
+        conn, cur = db_connect()
+        execute_query(cur, "UPDATE users SET password = ? WHERE login = ?;", 
+                     (generate_password_hash(new_password), username))
+        db_close(conn, cur)
+        flash('Пароль пользователя изменен', 'success')
+    except Exception as e:
+        print(f"Ошибка при изменении пароля: {e}")
+        flash('Ошибка при изменении пароля', 'error')
+    
     return redirect('/rgz')

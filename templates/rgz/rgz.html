@@ -23,69 +23,57 @@
             <h2>Добро пожаловать в систему сообщений!</h2>
             <p>Для начала работы необходимо авторизоваться или зарегистрироваться</p>
             <div style="margin-top: 20px;">
-                <a href="/rgz/login" style="display: inline-block; padding: 10px 20px; background: #3498db; color: white; text-decoration: none; border-radius: 5px; margin: 0 10px;">
+                <a href="/lab5/login" style="display: inline-block; padding: 10px 20px; background: #3498db; color: white; text-decoration: none; border-radius: 5px; margin: 0 10px;">
                     Войти
                 </a>
-                <a href="/rgz/register" style="display: inline-block; padding: 10px 20px; background: #2ecc71; color: white; text-decoration: none; border-radius: 5px; margin: 0 10px;">
+                <a href="/lab5/register" style="display: inline-block; padding: 10px 20px; background: #2ecc71; color: white; text-decoration: none; border-radius: 5px; margin: 0 10px;">
                     Зарегистрироваться
                 </a>
-            </div>
-            
-            <!-- Тестовые аккаунты -->
-            <div style="margin-top: 30px; padding: 15px; background: #fff3cd; border-radius: 5px; text-align: left; max-width: 400px; margin-left: auto; margin-right: auto;">
-                <h3>🔧 Тестовые аккаунты:</h3>
-                <p><strong>Администратор:</strong><br>Логин: admin<br>Пароль: admin123</p>
-                <p><strong>Обычные пользователи:</strong><br>
-                alex / 123<br>
-                maria / 123<br>
-                ivan / 123</p>
             </div>
         </div>
     {% else %}
         <p>Вы вошли как: <strong>{{ login }}</strong></p>
         <a href="/rgz/logout">Выйти</a>
 
-        <!-- Отладочная информация -->
-        <div style="background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 5px; font-size: 0.9em;">
-            <strong>Отладка:</strong><br>
-            Всего пользователей в системе: {{ users_db_size }}<br>
-            Все пользователи: {{ all_users|join(', ') }}<br>
-            Показано пользователей: {{ users|length }}
-        </div>
-
         {% if is_admin %}
             <h2>👑 Панель администратора - Управление пользователями</h2>
-            <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-                <thead>
-                    <tr style="background: #34495e; color: white;">
-                        <th style="padding: 10px; border: 1px solid #ddd;">Логин</th>
-                        <th style="padding: 10px; border: 1px solid #ddd;">Действия</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for user_login, user_data in users.items() %}
-                        <tr>
-                            <td style="padding: 10px; border: 1px solid #ddd;">
-                                {{ user_login }}
-                                {% if user_data.is_admin %}<span style="color: #e74c3c;"> (админ)</span>{% endif %}
-                            </td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">
-                                {% if not user_data.is_admin %}
-                                    <a href="/rgz/admin/edit_user/{{ user_login }}" style="color: #3498db; text-decoration: none; margin-right: 10px;">✏️ Изменить пароль</a>
-                                    <a href="/rgz/admin/delete_user/{{ user_login }}" style="color: #e74c3c; text-decoration: none;" onclick="return confirm('Удалить пользователя {{ user_login }}?')">🗑️ Удалить</a>
-                                {% else %}
-                                    <span style="color: #7f8c8d;">Системный аккаунт</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <h2>👥 Список пользователей</h2>
+            <p>Всего пользователей: {{ users_count }}</p>
             
             {% if users %}
-                <p>Выберите пользователя для начала общения:</p>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                    <thead>
+                        <tr style="background: #34495e; color: white;">
+                            <th style="padding: 10px; border: 1px solid #ddd;">Логин</th>
+                            <th style="padding: 10px; border: 1px solid #ddd;">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid #ddd;">
+                                    {{ user }}
+                                    {% if user == 'admin' %}<span style="color: #e74c3c;"> (админ)</span>{% endif %}
+                                </td>
+                                <td style="padding: 10px; border: 1px solid #ddd;">
+                                    {% if user != 'admin' %}
+                                        <a href="/rgz/admin/edit_user/{{ user }}" style="color: #3498db; text-decoration: none; margin-right: 10px;">✏️ Изменить пароль</a>
+                                        <a href="/rgz/admin/delete_user/{{ user }}" style="color: #e74c3c; text-decoration: none;" onclick="return confirm('Удалить пользователя {{ user }}?')">🗑️ Удалить</a>
+                                    {% else %}
+                                        <span style="color: #7f8c8d;">Системный аккаунт</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Нет зарегистрированных пользователей</p>
+            {% endif %}
+        {% else %}
+            <h2>👥 Список пользователей</h2>
+            <p>Всего пользователей для общения: {{ users_count }}</p>
+            
+            {% if users %}
                 <ul style="list-style: none; padding: 0;">
                     {% for user in users %}
                         <li style="padding: 15px; margin: 10px 0; background: #f8f9fa; border-radius: 5px; border-left: 4px solid #3498db;">
@@ -100,12 +88,6 @@
                 <div style="text-align: center; padding: 30px; background: #fff3cd; border-radius: 5px;">
                     <h3>😔 В системе пока нет других пользователей</h3>
                     <p>Попросите кого-нибудь зарегистрироваться, чтобы начать общение!</p>
-                    <p>Или воспользуйтесь тестовыми аккаунтами:</p>
-                    <div style="background: white; padding: 15px; border-radius: 5px; margin: 15px 0;">
-                        <strong>alex / 123</strong><br>
-                        <strong>maria / 123</strong><br>
-                        <strong>ivan / 123</strong>
-                    </div>
                 </div>
             {% endif %}
         {% endif %}
