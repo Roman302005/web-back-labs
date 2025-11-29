@@ -66,7 +66,7 @@ def db_connect():
                 "INSERT INTO users (login, password) VALUES (?, ?);",
                 ('admin', generate_password_hash('admin123'))
             )
-            print("✅ Администратор 'admin' создан с паролем 'admin123'")
+            print("Администратор 'admin' создан с паролем 'admin123'")
         
         conn.commit()
         return conn, cur
@@ -99,12 +99,7 @@ def get_all_users():
         conn, cur = db_connect()
         current_user = get_current_user()
         
-        if is_admin():
-            # Админ видит всех пользователей
-            execute_query(cur, "SELECT login FROM users WHERE login != ?;", (current_user,))
-        else:
-            # Обычный пользователь видит всех кроме себя
-            execute_query(cur, "SELECT login FROM users WHERE login != ?;", (current_user,))
+        execute_query(cur, "SELECT login FROM users WHERE login != ?;", (current_user,))
         
         users = [row['login'] for row in cur.fetchall()]
         db_close(conn, cur)
@@ -154,12 +149,10 @@ def main():
 
 @rgz.route('/rgz/register', methods=['GET', 'POST'])
 def register():
-    # Используем регистрацию из lab5
     return redirect('/lab5/register')
 
 @rgz.route('/rgz/login', methods=['GET', 'POST'])
 def login():
-    # Используем вход из lab5
     return redirect('/lab5/login')
 
 @rgz.route('/rgz/logout')
@@ -207,6 +200,11 @@ def send_message():
     if not to_user or not message_text:
         flash('Заполните все поля', 'error')
         return redirect(f'/rgz/chat/{to_user}')
+    
+    # Запрещаем отправку сообщений администратору
+    if to_user == 'admin':
+        flash('Нельзя отправлять сообщения администратору', 'error')
+        return redirect('/rgz')
     
     # Сохраняем сообщение в БД
     try:
