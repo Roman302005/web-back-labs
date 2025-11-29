@@ -15,6 +15,9 @@ try:
 except ImportError:
     pass
 
+#admin (admin123)
+
+
 rgz = Blueprint('rgz', __name__)
 
 def validate_login(login):
