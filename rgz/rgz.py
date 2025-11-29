@@ -53,11 +53,20 @@ def db_connect():
                 message TEXT NOT NULL,
                 timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 deleted_by_sender BOOLEAN DEFAULT 0,
-                deleted_by_receiver BOOLEAN DEFAULT 0,
-                FOREIGN KEY (from_user) REFERENCES users (login),
-                FOREIGN KEY (to_user) REFERENCES users (login)
+                deleted_by_receiver BOOLEAN DEFAULT 0
             )
         """)
+        
+        # Создаем администратора если его нет
+        cur.execute("SELECT * FROM users WHERE login = 'admin';")
+        admin_exists = cur.fetchone()
+        
+        if not admin_exists:
+            cur.execute(
+                "INSERT INTO users (login, password) VALUES (?, ?);",
+                ('admin', generate_password_hash('admin123'))
+            )
+            print("✅ Администратор 'admin' создан с паролем 'admin123'")
         
         conn.commit()
         return conn, cur
@@ -82,13 +91,21 @@ def get_current_user():
     return session.get('login')
 
 def is_admin():
-    return get_current_user() == 'admin'  # Администратор всегда с логином 'admin'
+    return get_current_user() == 'admin'
 
 def get_all_users():
     """Получить всех пользователей из БД"""
     try:
         conn, cur = db_connect()
-        execute_query(cur, "SELECT login FROM users WHERE login != ?;", (get_current_user(),))
+        current_user = get_current_user()
+        
+        if is_admin():
+            # Админ видит всех пользователей
+            execute_query(cur, "SELECT login FROM users WHERE login != ?;", (current_user,))
+        else:
+            # Обычный пользователь видит всех кроме себя
+            execute_query(cur, "SELECT login FROM users WHERE login != ?;", (current_user,))
+        
         users = [row['login'] for row in cur.fetchall()]
         db_close(conn, cur)
         return users
@@ -119,33 +136,21 @@ def get_chat_messages(user1, user2):
 
 @rgz.route('/rgz')
 def main():
+    # Инициализируем подключение к БД (создаст администратора если нужно)
+    conn, cur = db_connect()
+    db_close(conn, cur)
+    
     login = get_current_user()
     if not login:
         return render_template('rgz/rgz.html')
     
-    # Получаем всех пользователей кроме текущего
     users = get_all_users()
-    
-    # Для администратора показываем специальный интерфейс
-    if is_admin():
-        try:
-            conn, cur = db_connect()
-            execute_query(cur, "SELECT login FROM users;", ())
-            all_users = [row['login'] for row in cur.fetchall()]
-            db_close(conn, cur)
-            return render_template('rgz/rgz.html', 
-                                 login=login, 
-                                 users=all_users, 
-                                 is_admin=True,
-                                 users_count=len(all_users))
-        except Exception as e:
-            print(f"Ошибка при получении всех пользователей: {e}")
-            return render_template('rgz/rgz.html', login=login, users=[], is_admin=True)
     
     return render_template('rgz/rgz.html', 
                          login=login, 
                          users=users,
-                         users_count=len(users))
+                         users_count=len(users),
+                         is_admin=is_admin())
 
 @rgz.route('/rgz/register', methods=['GET', 'POST'])
 def register():

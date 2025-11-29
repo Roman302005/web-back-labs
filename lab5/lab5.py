@@ -154,7 +154,8 @@ def login():
         session['user_id'] = user['id']
         db_close(conn, cur)
         
-        return render_template('lab5/success_login.html', login=login)
+        # ИЗМЕНЕНИЕ: Перенаправляем на RGZ вместо lab5
+        return redirect('/rgz')
     
     except Exception as e:
         print(f"Ошибка при входе: {e}")
@@ -167,7 +168,6 @@ def logout():
     session.pop('user_id', None)
     return redirect(url_for('lab5.lab'))
 
-# Остальные функции create, list_articles, edit_article, delete_article остаются без изменений
 @lab5.route('/lab5/create', methods=['GET', 'POST'])
 def create():
     login = session.get('login')
