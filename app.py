@@ -134,7 +134,7 @@ def main():
                <a href="/lab4/">Лабораторная работа 4</a>
                <a href="/lab5">Лабораторная работа 5</a>
                <a href="/lab6">Лабораторная работа 6</a>
-               <a href="/rgz">Лабораторная работа 6</a>
+               <a href="/rgz">RGZ Мессенджер</a>
             </div>
 
             <div class="lab-section">
