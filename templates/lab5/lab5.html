@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Лабораторная работа 5</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -155,6 +156,45 @@
         .links a:hover {
             text-decoration: underline;
         }
+
+        .user-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 15px;
+        }
+
+        .btn-delete {
+            background: #e74c3c;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .btn-delete:hover {
+            background: #c0392b;
+            color: white;
+        }
+
+        .btn-logout {
+            background: #95a5a6;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .btn-logout:hover {
+            background: #7f8c8d;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -164,6 +204,10 @@
             <div class="user-info">
                 {% if login %}
                     Пользователь: <strong>{{ login }}</strong>
+                    <div class="user-actions">
+                        <a href="/lab5/delete_account" class="btn-delete">Удалить аккаунт</a>
+                        <a href="/lab5/logout" class="btn-logout">Выйти</a>
+                    </div>
                 {% else %}
                     Пользователь: <strong>Гость</strong>
                 {% endif %}
@@ -176,7 +220,7 @@
                 {% if login %}
                     <li><a href="/lab5/create">Создать статью</a></li>
                     <li><a href="/lab5/list">Мои статьи</a></li>
-                    <li><a href="/lab5/logout">Выйти</a></li>
+                    <li><a href="/rgz">Перейти к сообщениям (RGZ)</a></li>
                 {% else %}
                     <li><a href="/lab5/login">Войти</a></li>
                     <li><a href="/lab5/register">Регистрация</a></li>
@@ -192,10 +236,18 @@
                 <div style="margin-top: 20px; padding: 15px; background: #e8f4f8; border-radius: 5px;">
                     <p>Вы вошли как: <strong>{{ login }}</strong></p>
                     <p>Теперь вы можете работать с базой знаний.</p>
+                    <div style="margin-top: 10px;">
+                        <a href="/rgz" class="btn btn-primary">Перейти к системе сообщений (RGZ)</a>
+                    </div>
                 </div>
             {% else %}
                 <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 5px;">
                     <p>Для работы с базой знаний необходимо <a href="/lab5/login">войти</a> или <a href="/lab5/register">зарегистрироваться</a>.</p>
+                    <div style="margin-top: 15px; padding: 10px; background: #e8f4f8; border-radius: 5px;">
+                        <p><strong>Тестовый аккаунт администратора:</strong></p>
+                        <p>Логин: <code>admin</code></p>
+                        <p>Пароль: <code>admin123</code></p>
+                    </div>
                 </div>
             {% endif %}
         </main>
@@ -204,5 +256,8 @@
             <p>&copy; 2025 Лелюх Роман, ФБИ-34, 3 курс</p>
         </footer>
     </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

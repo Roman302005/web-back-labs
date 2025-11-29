@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, session, redirect, url_fo
 import traceback
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime
+import re
 
 try:
     import psycopg2
@@ -15,6 +16,36 @@ except ImportError:
     pass
 
 rgz = Blueprint('rgz', __name__)
+
+def validate_login(login):
+    """Валидация логина: только латинские буквы, цифры и знаки препинания"""
+    if not login or len(login.strip()) == 0:
+        return False, "Логин не может быть пустым"
+    
+    if len(login) < 3:
+        return False, "Логин должен содержать минимум 3 символа"
+    
+    if len(login) > 30:
+        return False, "Логин не может быть длиннее 30 символов"
+    
+    # Разрешаем латинские буквы, цифры, дефисы, подчеркивания
+    if not re.match(r'^[a-zA-Z0-9_-]+$', login):
+        return False, "Логин может содержать только латинские буквы, цифры, дефисы и подчеркивания"
+    
+    return True, ""
+
+def validate_password(password):
+    """Валидация пароля"""
+    if not password or len(password.strip()) == 0:
+        return False, "Пароль не может быть пустым"
+    
+    if len(password) < 4:
+        return False, "Пароль должен содержать минимум 4 символа"
+    
+    if len(password) > 50:
+        return False, "Пароль не может быть длиннее 50 символов"
+    
+    return True, ""
 
 def db_connect():
     db_type = current_app.config.get('DB_TYPE', 'sqlite')
@@ -56,17 +87,6 @@ def db_connect():
                 deleted_by_receiver BOOLEAN DEFAULT 0
             )
         """)
-        
-        # Создаем администратора если его нет
-        cur.execute("SELECT * FROM users WHERE login = 'admin';")
-        admin_exists = cur.fetchone()
-        
-        if not admin_exists:
-            cur.execute(
-                "INSERT INTO users (login, password) VALUES (?, ?);",
-                ('admin', generate_password_hash('admin123'))
-            )
-            print("Администратор 'admin' создан с паролем 'admin123'")
         
         conn.commit()
         return conn, cur
@@ -131,10 +151,6 @@ def get_chat_messages(user1, user2):
 
 @rgz.route('/rgz')
 def main():
-    # Инициализируем подключение к БД (создаст администратора если нужно)
-    conn, cur = db_connect()
-    db_close(conn, cur)
-    
     login = get_current_user()
     if not login:
         return render_template('rgz/rgz.html')
@@ -160,6 +176,48 @@ def logout():
     session.pop('login', None)
     flash('Вы вышли из системы', 'info')
     return redirect('/rgz')
+
+@rgz.route('/rgz/delete_account', methods=['GET', 'POST'])
+def delete_account():
+    current_user = get_current_user()
+    if not current_user:
+        return redirect('/lab5/login')
+    
+    if request.method == 'GET':
+        return render_template('rgz/delete_account.html')
+    
+    # Подтверждение удаления
+    confirm = request.form.get('confirm')
+    if confirm != 'DELETE':
+        flash('Для удаления аккаунта необходимо ввести слово DELETE', 'error')
+        return render_template('rgz/delete_account.html')
+    
+    try:
+        conn, cur = db_connect()
+        
+        # Удаляем пользователя
+        execute_query(cur, "DELETE FROM users WHERE login = ?;", (current_user,))
+        
+        # Удаляем все сообщения пользователя
+        execute_query(cur, "DELETE FROM rgz_messages WHERE from_user = ? OR to_user = ?;", (current_user, current_user))
+        
+        # Удаляем статьи пользователя (если есть таблица articles)
+        try:
+            execute_query(cur, "DELETE FROM articles WHERE user_id IN (SELECT id FROM users WHERE login = ?);", (current_user,))
+        except:
+            pass  # Игнорируем ошибку если таблицы articles нет
+        
+        db_close(conn, cur)
+        
+        # Выходим из системы
+        session.pop('login', None)
+        flash('Ваш аккаунт успешно удален', 'success')
+        return redirect('/rgz')
+        
+    except Exception as e:
+        print(f"Ошибка при удалении аккаунта: {e}")
+        flash('Ошибка при удалении аккаунта', 'error')
+        return render_template('rgz/delete_account.html')
 
 @rgz.route('/rgz/chat/<username>')
 def chat(username):
@@ -199,6 +257,15 @@ def send_message():
     
     if not to_user or not message_text:
         flash('Заполните все поля', 'error')
+        return redirect(f'/rgz/chat/{to_user}')
+    
+    # Валидация сообщения
+    if len(message_text.strip()) == 0:
+        flash('Сообщение не может быть пустым', 'error')
+        return redirect(f'/rgz/chat/{to_user}')
+    
+    if len(message_text) > 1000:
+        flash('Сообщение слишком длинное', 'error')
         return redirect(f'/rgz/chat/{to_user}')
     
     # Запрещаем отправку сообщений администратору
@@ -307,8 +374,11 @@ def edit_user(username):
         return render_template('rgz/edit_user.html', user_login=username)
     
     new_password = request.form.get('password')
-    if not new_password:
-        flash('Введите новый пароль', 'error')
+    
+    # Валидация пароля
+    is_valid, error_msg = validate_password(new_password)
+    if not is_valid:
+        flash(error_msg, 'error')
         return render_template('rgz/edit_user.html', user_login=username)
     
     try:
