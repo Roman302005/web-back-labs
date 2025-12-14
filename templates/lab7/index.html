@@ -8,12 +8,114 @@
 
 {% block style %}
 <style>
-    /* Основные стили для страницы */
+    /* Стили для таблицы фильмов */
+    .films-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 25px 0;
+        font-size: 0.9em;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .films-table thead tr {
+        background-color: #2c3e50;
+        color: #ffffff;
+        text-align: left;
+        font-weight: bold;
+    }
+    
+    .films-table th,
+    .films-table td {
+        padding: 14px 18px;
+        border-bottom: 1px solid #dddddd;
+    }
+    
+    .films-table tbody tr {
+        border-bottom: 1px solid #dddddd;
+        transition: all 0.2s ease;
+    }
+    
+    .films-table tbody tr:nth-of-type(even) {
+        background-color: #f8f9fa;
+    }
+    
+    .films-table tbody tr:last-of-type {
+        border-bottom: 2px solid #2c3e50;
+    }
+    
+    .films-table tbody tr:hover {
+        background-color: #e3f2fd;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-edit {
+        background-color: #3498db;
+        color: white;
+    }
+    
+    .btn-edit:hover {
+        background-color: #2980b9;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+    }
+    
+    .btn-delete {
+        background-color: #e74c3c;
+        color: white;
+    }
+    
+    .btn-delete:hover {
+        background-color: #c0392b;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+    }
+    
+    .btn-add {
+        background-color: #27ae60;
+        color: white;
+        padding: 12px 24px;
+        font-size: 16px;
+        margin-top: 20px;
+    }
+    
+    .btn-add:hover {
+        background-color: #229954;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+    }
+    
+    .film-year {
+        font-weight: 600;
+        color: #3498db;
+        background-color: #e3f2fd;
+        padding: 4px 10px;
+        border-radius: 20px;
+        display: inline-block;
+    }
+    
     .container {
         max-width: 1200px;
         margin: 0 auto;
         padding: 20px;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     
     .page-title {
@@ -21,341 +123,89 @@
         margin-bottom: 30px;
         padding-bottom: 15px;
         border-bottom: 3px solid #3498db;
-        font-size: 2.2em;
+        font-size: 2em;
+    }
+    
+    .loading {
         text-align: center;
-    }
-    
-    /* Стили для таблицы */
-    .films-table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-        margin: 25px 0;
-        font-size: 0.95em;
-        background: white;
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-    }
-    
-    .films-table thead {
-        background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-    }
-    
-    .films-table th {
-        color: white;
-        text-align: left;
-        font-weight: 600;
-        padding: 16px 20px;
-        border-bottom: 2px solid #2c3e50;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-size: 0.9em;
-    }
-    
-    .films-table th:first-child {
-        width: 35%;
-    }
-    
-    .films-table th:nth-child(2) {
-        width: 15%;
-    }
-    
-    .films-table th:last-child {
-        width: 20%;
-        text-align: center;
-    }
-    
-    .films-table tbody tr {
-        transition: all 0.3s ease;
-        border-bottom: 1px solid #eef1f5;
-    }
-    
-    .films-table tbody tr:last-child {
-        border-bottom: none;
-    }
-    
-    .films-table tbody tr:hover {
-        background-color: #f8fafc;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
-    }
-    
-    .films-table td {
-        padding: 18px 20px;
-        vertical-align: middle;
-    }
-    
-    .film-info {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-    }
-    
-    .film-title-ru {
-        font-weight: 600;
-        color: #2c3e50;
-        font-size: 1.1em;
-        margin-bottom: 3px;
-    }
-    
-    .film-title-original {
+        padding: 40px;
         color: #7f8c8d;
         font-style: italic;
-        font-size: 0.9em;
-        padding-left: 10px;
-        border-left: 2px solid #bdc3c7;
     }
     
-    .film-title-original:before {
-        content: "(";
-    }
-    
-    .film-title-original:after {
-        content: ")";
-    }
-    
-    .film-year {
-        font-weight: 600;
-        color: #3498db;
-        background-color: #e3f2fd;
-        padding: 6px 12px;
-        border-radius: 20px;
-        display: inline-block;
+    .no-films {
         text-align: center;
-        min-width: 70px;
-        box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
-    }
-    
-    .action-buttons {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-    }
-    
-    /* Стили для кнопок */
-    .btn {
-        padding: 10px 18px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: 500;
-        transition: all 0.2s ease;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
-    }
-    
-    .btn-edit {
-        background-color: #3498db;
-        color: white;
-        box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
-    }
-    
-    .btn-edit:hover {
-        background-color: #2980b9;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(52, 152, 219, 0.4);
-    }
-    
-    .btn-delete {
-        background-color: #e74c3c;
-        color: white;
-        box-shadow: 0 2px 4px rgba(231, 76, 60, 0.3);
-    }
-    
-    .btn-delete:hover {
-        background-color: #c0392b;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(231, 76, 60, 0.4);
-    }
-    
-    .btn-add {
-        background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
-        color: white;
-        padding: 14px 28px;
-        font-size: 16px;
-        margin-top: 30px;
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-        box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
-    }
-    
-    .btn-add:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 12px rgba(39, 174, 96, 0.4);
-    }
-    
-    .btn-add:active {
-        transform: translateY(-1px);
-    }
-    
-    /* Стили для модального окна */
-    .modal-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.7);
-        z-index: 1000;
-        justify-content: center;
-        align-items: center;
-        backdrop-filter: blur(3px);
-    }
-    
-    .modal-content {
-        background-color: white;
         padding: 40px;
-        border-radius: 15px;
-        width: 90%;
-        max-width: 550px;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-        transform: translateY(-20px);
-        animation: modalAppear 0.3s ease forwards;
+        color: #95a5a6;
+        font-size: 1.1em;
     }
     
-    @keyframes modalAppear {
-        to {
-            transform: translateY(0);
-        }
-    }
-    
-    .modal-title {
-        color: #2c3e50;
-        margin-bottom: 25px;
-        font-size: 1.8em;
-        text-align: center;
-        font-weight: 600;
-    }
-    
-    .form-group {
-        margin-bottom: 20px;
-    }
-    
-    .form-label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: 600;
-        color: #2c3e50;
-        font-size: 0.95em;
-    }
-    
-    .form-label .optional {
-        color: #7f8c8d;
-        font-weight: normal;
-        font-size: 0.85em;
-        margin-left: 5px;
-    }
-    
-    .form-input {
-        width: 100%;
-        padding: 12px 15px;
-        border: 2px solid #e0e0e0;
-        border-radius: 8px;
-        font-size: 16px;
-        transition: border-color 0.3s ease;
-        box-sizing: border-box;
-    }
-    
-    .form-input:focus {
-        outline: none;
-        border-color: #3498db;
-        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-    }
-    
-    .form-textarea {
-        min-height: 120px;
-        resize: vertical;
-    }
-    
-    .modal-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 15px;
-        margin-top: 30px;
-        padding-top: 20px;
-        border-top: 1px solid #eee;
-    }
-    
-    .btn-cancel {
-        background-color: #95a5a6;
-        color: white;
-        padding: 12px 24px;
-    }
-    
-    .btn-cancel:hover {
-        background-color: #7f8c8d;
-        transform: translateY(-2px);
-    }
-    
-    .btn-submit {
-        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-        color: white;
-        padding: 12px 24px;
-    }
-    
-    .btn-submit:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
-    }
-    
-    /* Стили для сообщений */
-    .alert {
+    .error-message {
+        background-color: #fee;
+        border: 1px solid #e74c3c;
+        color: #c0392b;
         padding: 15px;
-        border-radius: 8px;
+        border-radius: 4px;
         margin: 20px 0;
         display: none;
-        animation: fadeIn 0.3s ease;
     }
     
-    .alert-success {
+    .success-message {
         background-color: #d4edda;
         border: 1px solid #c3e6cb;
         color: #155724;
+        padding: 15px;
+        border-radius: 4px;
+        margin: 20px 0;
+        display: none;
     }
     
-    .alert-error {
-        background-color: #f8d7da;
-        border: 1px solid #f5c6cb;
-        color: #721c24;
+    /* Стили для отображения названий */
+    .film-title-container {
+        display: flex;
+        flex-direction: column;
     }
     
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
+    .film-russian-title {
+        font-weight: bold;
+        color: #2c3e50;
+        font-size: 1.1em;
+        margin-bottom: 5px;
     }
     
-    /* Адаптивность */
+    .film-original-title {
+        color: #7f8c8d;
+        font-style: italic;
+        font-size: 0.9em;
+        margin-top: 3px;
+    }
+    
     @media (max-width: 768px) {
         .films-table {
-            font-size: 0.85em;
+            font-size: 0.8em;
         }
         
         .films-table th,
         .films-table td {
-            padding: 12px 15px;
+            padding: 10px 12px;
         }
         
         .action-buttons {
             flex-direction: column;
-            gap: 8px;
+            gap: 5px;
         }
         
         .btn {
-            padding: 8px 12px;
+            padding: 6px 12px;
             font-size: 12px;
         }
         
-        .modal-content {
-            padding: 25px;
-            width: 95%;
+        .film-russian-title {
+            font-size: 1em;
+        }
+        
+        .film-original-title {
+            font-size: 0.85em;
         }
     }
 </style>
@@ -363,80 +213,34 @@
 
 {% block main %}
 <div class="container">
-    <h1 class="page-title">🎬 Управление фильмами</h1>
+    <h1 class="page-title">Список фильмов</h1>
     
-    <!-- Сообщения -->
-    <div id="alert-message" class="alert"></div>
+    <div id="error-message" class="error-message"></div>
+    <div id="success-message" class="success-message"></div>
     
-    <!-- Таблица фильмов -->
     <table class="films-table">
         <thead>
             <tr>
-                <th>Название фильма</th>
-                <th>Год выпуска</th>
-                <th>Действия</th>
+                <th width="30%">Название фильма</th>
+                <th width="10%">Год выпуска</th>
+                <th width="45%">Описание</th>
+                <th width="15%">Действия</th>
             </tr>
         </thead>
         <tbody id="film-list">
-            <!-- Данные будут загружены через JavaScript -->
+            <tr id="loading-row">
+                <td colspan="4" class="loading">
+                    <div>Загрузка фильмов...</div>
+                </td>
+            </tr>
         </tbody>
     </table>
     
-    <!-- Кнопка добавления фильма -->
-    <button onclick="addFilm()" class="btn btn-add">
-        <span>+</span> Добавить новый фильм
-    </button>
-</div>
-
-<!-- Модальное окно -->
-<div class="modal-overlay" id="film-modal">
-    <div class="modal-content">
-        <h2 class="modal-title" id="modal-title">Добавить фильм</h2>
-        
-        <input type="hidden" id="film-id">
-        
-        <div class="form-group">
-            <label class="form-label">
-                Название фильма на русском *
-            </label>
-            <input type="text" id="title-ru" class="form-input" required 
-                   placeholder="Введите название на русском языке">
-        </div>
-        
-        <div class="form-group">
-            <label class="form-label">
-                Оригинальное название 
-                <span class="optional">(оставьте пустым, если совпадает с русским)</span>
-            </label>
-            <input type="text" id="title" class="form-input" 
-                   placeholder="Введите оригинальное название">
-        </div>
-        
-        <div class="form-group">
-            <label class="form-label">Год выпуска *</label>
-            <input type="number" id="year" class="form-input" 
-                   min="1900" max="2025" required 
-                   placeholder="Например: 2024">
-        </div>
-        
-        <div class="form-group">
-            <label class="form-label">Описание *</label>
-            <textarea id="description" class="form-input form-textarea" 
-                      required placeholder="Краткое описание фильма..."></textarea>
-        </div>
-        
-        <div class="modal-actions">
-            <button type="button" onclick="cancel()" class="btn btn-cancel">
-                Отмена
-            </button>
-            <button type="submit" onclick="sendFilm()" class="btn btn-submit">
-                Сохранить
-            </button>
-        </div>
-    </div>
+    <button onclick="addFilm()" class="btn btn-add">Добавить новый фильм</button>
 </div>
 
 <script>
+    // Загружаем фильмы при загрузке страницы
     document.addEventListener('DOMContentLoaded', function() {
         fillFilmList();
     });
