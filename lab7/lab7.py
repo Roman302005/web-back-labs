@@ -40,7 +40,30 @@ films = [
     }
 ]
 
-# Получение всех фильмов sdfsdf
+# Вспомогательная функция для обработки названий
+def process_film_data(film_data):
+    """Обрабатывает данные фильма: если оригинальное название пустое, 
+       использует русское название"""
+    processed_data = film_data.copy()
+    
+    # Если оригинальное название пустое, а русское задано
+    if not processed_data.get('title', '').strip() and processed_data.get('title_ru', '').strip():
+        processed_data['title'] = processed_data['title_ru']
+    
+    # Если русское название пустое, а оригинальное задано
+    if not processed_data.get('title_ru', '').strip() and processed_data.get('title', '').strip():
+        processed_data['title_ru'] = processed_data['title']
+    
+    # Преобразуем год в число
+    if 'year' in processed_data:
+        try:
+            processed_data['year'] = int(processed_data['year'])
+        except (ValueError, TypeError):
+            processed_data['year'] = 0
+    
+    return processed_data
+
+# Получение всех фильмов
 @lab7.route('/lab7/rest-api/films/', methods=['GET'])
 def get_films():
     return jsonify(films)
@@ -48,71 +71,58 @@ def get_films():
 # Получение конкретного фильма по ID
 @lab7.route('/lab7/rest-api/films/<int:id>', methods=['GET'])
 def get_film(id):
-    # Проверка на выход за границы списка
     if id < 0 or id >= len(films):
         abort(404, description=f"Фильм с ID {id} не найден")
-    
     return jsonify(films[id])
 
 # Удаление фильма по ID
 @lab7.route('/lab7/rest-api/films/<int:id>', methods=['DELETE'])
 def del_film(id):
-    # Проверка на выход за границы списка
     if id < 0 or id >= len(films):
         abort(404, description=f"Фильм с ID {id} не найден")
-    
-    # Удаляем фильм из списка
     del films[id]
-    
-    # Возвращаем пустой ответ с кодом 204 No Content
     return '', 204
 
 # Редактирование существующего фильма
 @lab7.route('/lab7/rest-api/films/<int:id>', methods=['PUT'])
 def put_film(id):
-    # Проверка на выход за границы списка
     if id < 0 or id >= len(films):
         abort(404, description=f"Фильм с ID {id} не найден")
     
-    # Получаем данные из запроса (JSON)
     film_data = request.get_json()
-    
-    # Проверяем, что данные получены
     if not film_data:
         abort(400, description="Отсутствуют данные для обновления")
     
-    # Обновляем фильм
-    films[id] = film_data
+    # Обрабатываем данные фильма
+    processed_data = process_film_data(film_data)
     
-    # Возвращаем обновлённый фильм
+    # Обновляем фильм
+    films[id] = processed_data
     return jsonify(films[id]), 200
 
 # Добавление нового фильма
 @lab7.route('/lab7/rest-api/films/', methods=['POST'])
 def add_film():
-    # Получаем данные из запроса (JSON)
     film_data = request.get_json()
-    
-    # Проверяем, что данные получены
     if not film_data:
         abort(400, description="Отсутствуют данные для создания фильма")
     
     # Проверяем обязательные поля
-    required_fields = ['title', 'title_ru', 'year', 'description']
-    for field in required_fields:
-        if field not in film_data:
-            abort(400, description=f"Отсутствует обязательное поле: {field}")
+    if not film_data.get('title_ru', '').strip() and not film_data.get('title', '').strip():
+        abort(400, description="Необходимо указать хотя бы одно название фильма")
     
-    # Добавляем новый фильм в конец списка
-    films.append(film_data)
+    if 'year' not in film_data:
+        abort(400, description="Не указан год выпуска")
     
-    # Возвращаем ID нового фильма (индекс последнего элемента)
+    # Обрабатываем данные фильма
+    processed_data = process_film_data(film_data)
+    
+    # Добавляем новый фильм
+    films.append(processed_data)
     new_id = len(films) - 1
     
-    # Обычно при POST возвращают созданный объект или его ID
-    # Можно вернуть как сам фильм, так и его ID
     return jsonify({
         "id": new_id,
         "message": "Фильм успешно добавлен",
-        "film": film_data
-    }), 201  # 201 Created - стандартный код для успешного создания
+        "film": processed_data
+    }), 201
