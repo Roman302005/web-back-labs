@@ -10,7 +10,7 @@ try:
     from psycopg2.extras import RealDictCursor
 except ImportError:
     pass
-# sdfsdf ывапыва  sdfgsdf
+# sdfsdf ывапыва  sdfgsdf аывав
 try:
     import sqlite3
 except ImportError:
