@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список книг</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .book-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+            transition: transform 0.3s ease;
+        }
+        .book-card:hover {
+            transform: translateY(-5px);
+        }
+        .book-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .book-author {
+            color: #7f8c8d;
+            margin-bottom: 8px;
+        }
+        .book-genre {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+        .book-pages {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .links {
+            margin-top: 30px;
+            text-align: center;
+        }
+        .links a {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 8px 12px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        .links a:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .home-link {
+            background: #2c3e50 !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Список книг</h1>
+        
+        <div class="books-grid">
+            {% for book in books %}
+            <div class="book-card">
+                <div class="book-title">{{ book.title }}</div>
+                <div class="book-author">Автор: {{ book.author }}</div>
+                <div class="book-genre">{{ book.genre }}</div>
+                <div class="book-pages">Страниц: {{ book.pages }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="links">
+            <a href="/lab2">Вернуться к лабораторной работе 2</a>
+            <a href="/" class="home-link">На главную</a>
+        </div>
+    </div>
+</body>
+</html>

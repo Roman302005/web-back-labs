@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Галерея автомобилей</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .cars-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin: 20px 0;
+        }
+        .car-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .car-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+        .car-image {
+            width: 100%;
+            height: 180px;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        .car-info {
+            padding: 15px;
+        }
+        .car-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        .car-description {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+        .links {
+            margin-top: 30px;
+            text-align: center;
+        }
+        .links a {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 8px 12px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        .links a:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .home-link {
+            background: #2c3e50 !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Галерея автомобилей</h1>
+        
+        <div class="cars-grid">
+            {% for car in cars %}
+            <div class="car-card">
+                <div class="car-image">
+                    {% if car.image %}
+                    <img src="{{ url_for('static', filename=car.image) }}" alt="{{ car.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    {% else %}
+                    Изображение: {{ car.image }}
+                    {% endif %}
+                </div>
+                <div class="car-info">
+                    <div class="car-name">{{ car.name }}</div>
+                    <div class="car-description">{{ car.description }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="links">
+            <a href="/lab2">Вернуться к лабораторной работе 2</a>
+            <a href="/" class="home-link">На главную</a>
+        </div>
+    </div>
+</body>
+</html>

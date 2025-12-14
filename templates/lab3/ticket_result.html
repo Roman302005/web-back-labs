@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block lab %}Железнодорожный билет{% endblock %}
+
+{% block main %}
+<h1>Ваш билет</h1>
+<div class="ticket">
+    <div><strong>ФИО:</strong> {{ fio }}</div>
+    <div><strong>Тип билета:</strong> {{ ticket_type }}</div>
+    <div><strong>Возраст:</strong> {{ age }}</div>
+    <div><strong>Полка:</strong> 
+        {% if shelf == 'lower' %}Нижняя
+        {% elif shelf == 'upper' %}Верхняя
+        {% elif shelf == 'upper-side' %}Верхняя боковая
+        {% else %}Нижняя боковая{% endif %}
+    </div>
+    <div><strong>Бельё:</strong> {{ 'Да' if linen else 'Нет' }}</div>
+    <div><strong>Багаж:</strong> {{ 'Да' if baggage else 'Нет' }}</div>
+    <div><strong>Страховка:</strong> {{ 'Да' if insurance else 'Нет' }}</div>
+    <div><strong>Маршрут:</strong> {{ departure }} → {{ destination }}</div>
+    <div><strong>Дата:</strong> {{ date }}</div>
+    <div><strong>Стоимость:</strong> {{ price }} руб.</div>
+</div>
+<a href="/lab3/ticket-form">Новый билет</a>
+{% endblock %}
