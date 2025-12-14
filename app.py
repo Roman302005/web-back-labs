@@ -26,6 +26,7 @@ app.register_blueprint(lab3)
 app.register_blueprint(lab4)
 app.register_blueprint(lab5)
 app.register_blueprint(lab6)
+app.register_blueprint(lab7)
 app.register_blueprint(rgz)
 
 app.secret_key = 'секретно-секретный секрет'
