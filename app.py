@@ -8,6 +8,7 @@ from lab3.lab3 import lab3
 from lab4.lab4 import lab4
 from lab5.lab5 import lab5
 from lab6.lab6 import lab6
+from lab7.lab7 import lab7 
 
 from rgz.rgz import rgz
 request_log = deque(maxlen=20)
@@ -134,6 +135,7 @@ def main():
                <a href="/lab4/">Лабораторная работа 4</a>
                <a href="/lab5">Лабораторная работа 5</a>
                <a href="/lab6">Лабораторная работа 6</a>
+               <a href="/lab7">Лабораторная работа 7</a>
                <a href="/rgz">RGZ Мессенджер</a>
             </div>
 
