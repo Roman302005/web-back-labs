@@ -1,230 +1,108 @@
 <!-- templates/lab8/create.html -->
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Создание статьи - Лабораторная работа 8</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+{% extends "lab8/base.html" %}
 
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            background-color: #f4f4f4;
-        }
+{% block title %}Создание статьи - Лабораторная работа 8{% endblock %}
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+{% block content %}
+<h2 style="margin-bottom: 30px; color: #2c3e50;">Создание новой статьи</h2>
 
-        header {
-            background: #2c3e50;
-            color: white;
-            padding: 1rem;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
+{% if error %}
+    <div class="error">{{ error }}</div>
+{% endif %}
 
-        h1 {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        .user-info {
-            text-align: center;
-            font-size: 1.1rem;
-        }
-
-        nav {
-            background: white;
-            padding: 1rem;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .nav-links {
-            list-style: none;
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            color: #3498db;
-            font-weight: bold;
-            padding: 0.5rem 1rem;
-            border: 2px solid #3498db;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-        }
-
-        .nav-links a:hover {
-            background: #3498db;
-            color: white;
-        }
-
-        main {
-            background: white;
-            padding: 2rem;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        footer {
-            text-align: center;
-            margin-top: 20px;
-            padding: 1rem;
-            color: #666;
-        }
-
-        .error {
-            color: #e74c3c;
-            background: #fadbd8;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            border: 1px solid #e74c3c;
-        }
-
-        form {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        form div {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        input[type="text"],
-        textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-            font-family: Arial, sans-serif;
-        }
-
-        textarea {
-            min-height: 200px;
-            resize: vertical;
-        }
-
-        button {
-            background: #3498db;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-        }
-
-        button:hover {
-            background: #2980b9;
-        }
-
-        .form-actions {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 30px;
-        }
-
-        .cancel-btn {
-            background: #95a5a6;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .cancel-btn:hover {
-            background: #7f8c8d;
-        }
-
-        .form-info {
-            background: #e8f4fc;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            font-size: 0.9rem;
-            color: #2c3e50;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <header>
-            <h1>WEB-программирование, часть 2. Лабораторная работа 8</h1>
-            <div class="user-info">
-                Пользователь: <strong>{{ username }}</strong>
-            </div>
-        </header>
-
-        <nav>
-            <ul class="nav-links">
-                <li><a href="/lab8">Главная</a></li>
-                <li><a href="/lab8/login">Вход</a></li>
-                <li><a href="/lab8/register">Регистрация</a></li>
-                <li><a href="/lab8/articles">Список статей</a></li>
-                <li><a href="/lab8/create">Создать статью</a></li>
-            </ul>
-        </nav>
-
-        <main>
-            <h2>Создание новой статьи</h2>
-            
-            {% if error %}
-                <div class="error">{{ error }}</div>
-            {% endif %}
-            
-            <div class="form-info">
-                Заполните все поля для создания новой статьи. Название должно быть не длиннее 100 символов, 
-                текст статьи — не более 5000 символов.
+<div style="max-width: 800px; margin: 0 auto;">
+    <form action="/lab8/create" method="post">
+        <div style="background: #f8f9fa; padding: 30px; border-radius: 10px; margin-bottom: 30px;">
+            <div style="margin-bottom: 25px;">
+                <label for="title" style="display: block; margin-bottom: 10px; font-weight: 600; color: #34495e;">
+                    Название статьи:
+                </label>
+                <input type="text" id="title" name="title" required value="{{ title|default('') }}"
+                       style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; 
+                              font-size: 16px; transition: border-color 0.3s ease;"
+                       onfocus="this.style.borderColor='#3498db'"
+                       onblur="this.style.borderColor='#ddd'"
+                       maxlength="100">
+                <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+                    <small style="color: #7f8c8d;">Максимум 100 символов</small>
+                    <small id="title-counter" style="color: #95a5a6;">0/100</small>
+                </div>
             </div>
             
-            <form action="/lab8/create" method="post">
-                <div>
-                    <label for="title">Название статьи:</label>
-                    <input type="text" id="title" name="title" required maxlength="100">
+            <div style="margin-bottom: 25px;">
+                <label for="article_text" style="display: block; margin-bottom: 10px; font-weight: 600; color: #34495e;">
+                    Текст статьи:
+                </label>
+                <textarea id="article_text" name="article_text" required 
+                          style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; 
+                                 font-size: 16px; min-height: 300px; resize: vertical; 
+                                 transition: border-color 0.3s ease;"
+                          onfocus="this.style.borderColor='#3498db'"
+                          onblur="this.style.borderColor='#ddd'"
+                          maxlength="5000">{{ article_text|default('') }}</textarea>
+                <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+                    <small style="color: #7f8c8d;">Максимум 5000 символов</small>
+                    <small id="text-counter" style="color: #95a5a6;">0/5000</small>
                 </div>
-                
-                <div>
-                    <label for="article_text">Текст статьи:</label>
-                    <textarea id="article_text" name="article_text" required maxlength="5000"></textarea>
-                </div>
-                
-                <div class="form-actions">
-                    <a href="/lab8/articles" class="cancel-btn">Отмена</a>
-                    <button type="submit">Создать статью</button>
-                </div>
-            </form>
-        </main>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: flex; align-items: center; cursor: pointer;">
+                    <input type="checkbox" id="is_public" name="is_public" checked 
+                           style="margin-right: 10px; width: 18px; height: 18px;">
+                    <span style="color: #34495e; font-weight: 600;">Сделать статью публичной</span>
+                </label>
+                <small style="color: #7f8c8d; display: block; margin-top: 5px;">
+                    Публичные статьи видны всем пользователям, приватные — только вам
+                </small>
+            </div>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <a href="/lab8/articles" 
+               style="color: #7f8c8d; text-decoration: none; font-weight: 600; padding: 12px 24px; 
+                      border: 2px solid #95a5a6; border-radius: 25px; transition: all 0.3s ease;">
+                ← Отмена
+            </a>
+            
+            <button type="submit" 
+                    style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: white; 
+                           padding: 12px 30px; border: none; border-radius: 25px; font-size: 16px; 
+                           font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                📝 Опубликовать статью
+            </button>
+        </div>
+    </form>
+</div>
 
-        <footer>
-            <p>&copy; 2025 Лелюх Роман, ФБИ-34, 3 курс</p>
-        </footer>
-    </div>
-</body>
-</html>
+<script>
+// Счетчики символов
+document.addEventListener('DOMContentLoaded', function() {
+    const titleInput = document.getElementById('title');
+    const textArea = document.getElementById('article_text');
+    const titleCounter = document.getElementById('title-counter');
+    const textCounter = document.getElementById('text-counter');
+    
+    function updateCounter(input, counter, max) {
+        counter.textContent = input.value.length + '/' + max;
+        if (input.value.length > max * 0.9) {
+            counter.style.color = '#e74c3c';
+        } else {
+            counter.style.color = '#95a5a6';
+        }
+    }
+    
+    titleInput.addEventListener('input', function() {
+        updateCounter(titleInput, titleCounter, 100);
+    });
+    
+    textArea.addEventListener('input', function() {
+        updateCounter(textArea, textCounter, 5000);
+    });
+    
+    // Инициализация счетчиков
+    updateCounter(titleInput, titleCounter, 100);
+    updateCounter(textArea, textCounter, 5000);
+});
+</script>
+{% endblock %}

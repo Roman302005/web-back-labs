@@ -1,206 +1,42 @@
 <!-- templates/lab8/register.html -->
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Регистрация - Лабораторная работа 8</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+{% extends "lab8/base.html" %}
 
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            background-color: #f4f4f4;
-        }
+{% block title %}Регистрация - Лабораторная работа 8{% endblock %}
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        header {
-            background: #2c3e50;
-            color: white;
-            padding: 1rem;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        .user-info {
-            text-align: center;
-            font-size: 1.1rem;
-        }
-
-        nav {
-            background: white;
-            padding: 1rem;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .nav-links {
-            list-style: none;
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            color: #3498db;
-            font-weight: bold;
-            padding: 0.5rem 1rem;
-            border: 2px solid #3498db;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-        }
-
-        .nav-links a:hover {
-            background: #3498db;
-            color: white;
-        }
-
-        main {
-            background: white;
-            padding: 2rem;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        footer {
-            text-align: center;
-            margin-top: 20px;
-            padding: 1rem;
-            color: #666;
-        }
-
-        .error {
-            color: #e74c3c;
-            background: #fadbd8;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            border: 1px solid #e74c3c;
-        }
-
-        form {
-            max-width: 400px;
-            margin: 0 auto;
-        }
-
-        form div {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        input[type="text"],
-        input[type="password"] {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-
-        button {
-            background: #3498db;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            width: 100%;
-        }
-
-        button:hover {
-            background: #2980b9;
-        }
-
-        .links {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .links a {
-            color: #3498db;
-            text-decoration: none;
-            margin: 0 10px;
-        }
-
-        .links a:hover {
-            text-decoration: underline;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <header>
-            <h1>WEB-программирование, часть 2. Лабораторная работа 8</h1>
-            <div class="user-info">
-                Регистрация
-            </div>
-        </header>
-
-        <nav>
-            <ul class="nav-links">
-                <li><a href="/lab8">Главная</a></li>
-                <li><a href="/lab8/login">Вход</a></li>
-                <li><a href="/lab8/register">Регистрация</a></li>
-                <li><a href="/lab8/articles">Список статей</a></li>
-                <li><a href="/lab8/create">Создать статью</a></li>
-            </ul>
-        </nav>
-
-        <main>
-            <h2>Регистрация</h2>
-            
-            {% if error %}
-                <div class="error">{{ error }}</div>
-            {% endif %}
-            
-            <form action="/lab8/register" method="post">
-                <div>
-                    <label for="login">Логин:</label>
-                    <input type="text" id="login" name="login" required>
-                </div>
-                
-                <div>
-                    <label for="password">Пароль:</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
-                
-                <button type="submit">Зарегистрироваться</button>
-            </form>
-            
-            <div class="links">
-                <a href="/lab8/login">Уже есть аккаунт? Войдите</a>
-                <br>
-                <a href="/lab8">Вернуться на главную</a>
-            </div>
-        </main>
-
-        <footer>
-            <p>&copy; 2025 Лелюх Роман, ФБИ-34, 3 курс</p>
-        </footer>
+{% block content %}
+<div style="max-width: 400px; margin: 0 auto;">
+    <h2 style="text-align: center; margin-bottom: 30px; color: #2c3e50;">Регистрация</h2>
+    
+    {% if error %}
+        <div class="error">{{ error }}</div>
+    {% endif %}
+    
+    <form action="/lab8/register" method="post" style="background: #f8f9fa; padding: 30px; border-radius: 10px;">
+        <div style="margin-bottom: 20px;">
+            <label for="login" style="display: block; margin-bottom: 8px; font-weight: 600; color: #34495e;">Логин:</label>
+            <input type="text" id="login" name="login" required 
+                   style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px;">
+            <small style="color: #7f8c8d; display: block; margin-top: 5px;">от 3 до 30 символов</small>
+        </div>
+        
+        <div style="margin-bottom: 25px;">
+            <label for="password" style="display: block; margin-bottom: 8px; font-weight: 600; color: #34495e;">Пароль:</label>
+            <input type="password" id="password" name="password" required 
+                   style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px;">
+            <small style="color: #7f8c8d; display: block; margin-top: 5px;">не менее 4 символов</small>
+        </div>
+        
+        <button type="submit" 
+                style="width: 100%; padding: 12px; background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); 
+                       color: white; border: none; border-radius: 25px; font-size: 16px; font-weight: 600; 
+                       cursor: pointer; transition: all 0.3s ease;">
+            Зарегистрироваться
+        </button>
+    </form>
+    
+    <div style="text-align: center; margin-top: 25px;">
+        <p>Уже есть аккаунт? <a href="/lab8/login" style="color: #3498db; font-weight: 600;">Войдите</a></p>
+        <p style="margin-top: 10px;"><a href="/lab8" style="color: #7f8c8d; text-decoration: none;">← Вернуться на главную</a></p>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

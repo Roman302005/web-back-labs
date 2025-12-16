@@ -10,6 +10,9 @@ from lab5.lab5 import lab5
 from lab6.lab6 import lab6
 from lab7.lab7 import lab7 
 from lab8.lab8 import lab8
+from flask import g
+import sqlite3
+
 
 from rgz.rgz import rgz
 request_log = deque(maxlen=20)
@@ -20,6 +23,8 @@ load_dotenv()
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'секретно-секретный-секрет')
 app.config['DB_TYPE'] = os.getenv('DB_TYPE', 'postgres')
+
+
 
 app.register_blueprint(lab1)
 app.register_blueprint(lab2)
@@ -32,6 +37,15 @@ app.register_blueprint(lab8)
 app.register_blueprint(rgz)
 
 app.secret_key = 'секретно-секретный секрет'
+
+
+
+@app.teardown_appcontext
+def close_db_connection(exception):
+    """Закрытие соединения с базой данных"""
+    db = getattr(g, '_database', None)
+    if db is not None:
+        db.close()
 
 @app.route('/')
 def main():

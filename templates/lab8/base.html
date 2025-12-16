@@ -1,0 +1,224 @@
+<!-- templates/lab8/base.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Лабораторная работа 8{% endblock %}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 2.2rem;
+        }
+
+        .user-info {
+            text-align: center;
+            font-size: 1.1rem;
+            color: #34495e;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .user-info strong {
+            color: #3498db;
+        }
+
+        nav {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1rem;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #3498db;
+            font-weight: 600;
+            padding: 0.6rem 1.2rem;
+            border: 2px solid #3498db;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .nav-links a:hover {
+            background: #3498db;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        main {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            min-height: 400px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 25px;
+            padding: 1.5rem;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .error {
+            color: #e74c3c;
+            background: #fadbd8;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #e74c3c;
+            font-weight: 500;
+        }
+
+        .success {
+            color: #27ae60;
+            background: #d5f4e6;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #27ae60;
+            font-weight: 500;
+        }
+
+        .user-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .btn-logout {
+            background: #95a5a6;
+            color: white;
+            border: none;
+        }
+
+        .btn-logout:hover {
+            background: #7f8c8d;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #e74c3c;
+            color: white;
+            border: none;
+        }
+
+        .btn-delete:hover {
+            background: #c0392b;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .nav-links {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .nav-links a {
+                width: 80%;
+                text-align: center;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+    {% block styles %}{% endblock %}
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>WEB-программирование, часть 2. Лабораторная работа 8</h1>
+            <div class="user-info">
+                Пользователь: <strong>{{ username|default('anonymous') }}</strong>
+                {% if username and username != 'anonymous' %}
+                <div class="user-actions">
+                    <a href="/lab8/logout" class="btn btn-logout">Выйти</a>
+                </div>
+                {% endif %}
+            </div>
+        </header>
+
+        <nav>
+            <ul class="nav-links">
+                <li><a href="/lab8">Главная</a></li>
+                <li><a href="/lab8/login">Вход</a></li>
+                <li><a href="/lab8/register">Регистрация</a></li>
+                <li><a href="/lab8/articles">Список статей</a></li>
+                <li><a href="/lab8/create">Создать статью</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            {% block content %}{% endblock %}
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Лелюх Роман, ФБИ-34, 3 курс</p>
+        </footer>
+    </div>
+</body>
+</html>
