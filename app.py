@@ -14,6 +14,10 @@ from lab5.lab5 import lab5
 from lab6.lab6 import lab6
 from lab7.lab7 import lab7 
 from lab8.lab8 import lab8
+# Добавить в импорты
+from lab9.lab9 import lab9
+
+
 from rgz.rgz import rgz
 
 request_log = deque(maxlen=20)
@@ -52,6 +56,7 @@ app.register_blueprint(lab5)
 app.register_blueprint(lab6)
 app.register_blueprint(lab7)
 app.register_blueprint(lab8)
+app.register_blueprint(lab9)
 app.register_blueprint(rgz)
 
 @app.teardown_appcontext
