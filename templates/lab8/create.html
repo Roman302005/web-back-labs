@@ -1,108 +1,28 @@
-<!-- templates/lab8/create.html -->
-{% extends "lab8/base.html" %}
-
-{% block title %}Создание статьи - Лабораторная работа 8{% endblock %}
-
-{% block content %}
-<h2 style="margin-bottom: 30px; color: #2c3e50;">Создание новой статьи</h2>
-
-{% if error %}
-    <div class="error">{{ error }}</div>
-{% endif %}
-
-<div style="max-width: 800px; margin: 0 auto;">
-    <form action="/lab8/create" method="post">
-        <div style="background: #f8f9fa; padding: 30px; border-radius: 10px; margin-bottom: 30px;">
-            <div style="margin-bottom: 25px;">
-                <label for="title" style="display: block; margin-bottom: 10px; font-weight: 600; color: #34495e;">
-                    Название статьи:
-                </label>
-                <input type="text" id="title" name="title" required value="{{ title|default('') }}"
-                       style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; 
-                              font-size: 16px; transition: border-color 0.3s ease;"
-                       onfocus="this.style.borderColor='#3498db'"
-                       onblur="this.style.borderColor='#ddd'"
-                       maxlength="100">
-                <div style="display: flex; justify-content: space-between; margin-top: 5px;">
-                    <small style="color: #7f8c8d;">Максимум 100 символов</small>
-                    <small id="title-counter" style="color: #95a5a6;">0/100</small>
-                </div>
-            </div>
-            
-            <div style="margin-bottom: 25px;">
-                <label for="article_text" style="display: block; margin-bottom: 10px; font-weight: 600; color: #34495e;">
-                    Текст статьи:
-                </label>
-                <textarea id="article_text" name="article_text" required 
-                          style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; 
-                                 font-size: 16px; min-height: 300px; resize: vertical; 
-                                 transition: border-color 0.3s ease;"
-                          onfocus="this.style.borderColor='#3498db'"
-                          onblur="this.style.borderColor='#ddd'"
-                          maxlength="5000">{{ article_text|default('') }}</textarea>
-                <div style="display: flex; justify-content: space-between; margin-top: 5px;">
-                    <small style="color: #7f8c8d;">Максимум 5000 символов</small>
-                    <small id="text-counter" style="color: #95a5a6;">0/5000</small>
-                </div>
-            </div>
-            
-            <div style="margin-bottom: 20px;">
-                <label style="display: flex; align-items: center; cursor: pointer;">
-                    <input type="checkbox" id="is_public" name="is_public" checked 
-                           style="margin-right: 10px; width: 18px; height: 18px;">
-                    <span style="color: #34495e; font-weight: 600;">Сделать статью публичной</span>
-                </label>
-                <small style="color: #7f8c8d; display: block; margin-top: 5px;">
-                    Публичные статьи видны всем пользователям, приватные — только вам
-                </small>
-            </div>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Создать статью</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        input, textarea { padding: 8px; margin: 5px; width: 100%; }
+        textarea { height: 200px; }
+        button { padding: 10px 20px; background: blue; color: white; border: none; }
+    </style>
+</head>
+<body>
+    <h1>Создать статью</h1>
+    
+    <form method="POST">
+        <div>
+            <input type="text" name="title" placeholder="Заголовок" required>
         </div>
-        
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <a href="/lab8/articles" 
-               style="color: #7f8c8d; text-decoration: none; font-weight: 600; padding: 12px 24px; 
-                      border: 2px solid #95a5a6; border-radius: 25px; transition: all 0.3s ease;">
-                ← Отмена
-            </a>
-            
-            <button type="submit" 
-                    style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: white; 
-                           padding: 12px 30px; border: none; border-radius: 25px; font-size: 16px; 
-                           font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
-                📝 Опубликовать статью
-            </button>
+        <div>
+            <textarea name="article_text" placeholder="Текст статьи" required></textarea>
         </div>
+        <button type="submit">Создать</button>
     </form>
-</div>
-
-<script>
-// Счетчики символов
-document.addEventListener('DOMContentLoaded', function() {
-    const titleInput = document.getElementById('title');
-    const textArea = document.getElementById('article_text');
-    const titleCounter = document.getElementById('title-counter');
-    const textCounter = document.getElementById('text-counter');
     
-    function updateCounter(input, counter, max) {
-        counter.textContent = input.value.length + '/' + max;
-        if (input.value.length > max * 0.9) {
-            counter.style.color = '#e74c3c';
-        } else {
-            counter.style.color = '#95a5a6';
-        }
-    }
-    
-    titleInput.addEventListener('input', function() {
-        updateCounter(titleInput, titleCounter, 100);
-    });
-    
-    textArea.addEventListener('input', function() {
-        updateCounter(textArea, textCounter, 5000);
-    });
-    
-    // Инициализация счетчиков
-    updateCounter(titleInput, titleCounter, 100);
-    updateCounter(textArea, textCounter, 5000);
-});
-</script>
-{% endblock %}
+    <p><a href="/lab8/articles/">К списку статей</a></p>
+    <p><a href="/lab8/">На главную лабы</a></p>
+</body>
+</html>

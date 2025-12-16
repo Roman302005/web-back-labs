@@ -1,40 +1,32 @@
-<!-- templates/lab8/login.html -->
-{% extends "lab8/base.html" %}
-
-{% block title %}Вход - Лабораторная работа 8{% endblock %}
-
-{% block content %}
-<div style="max-width: 400px; margin: 0 auto;">
-    <h2 style="text-align: center; margin-bottom: 30px; color: #2c3e50;">Вход в систему</h2>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Вход</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        input { padding: 8px; margin: 5px; width: 200px; }
+        button { padding: 10px 20px; background: blue; color: white; border: none; }
+        .error { color: red; background: #ffe6e6; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Вход</h1>
     
     {% if error %}
-        <div class="error">{{ error }}</div>
+    <div class="error">{{ error }}</div>
     {% endif %}
     
-    <form action="/lab8/login" method="post" style="background: #f8f9fa; padding: 30px; border-radius: 10px;">
-        <div style="margin-bottom: 20px;">
-            <label for="login" style="display: block; margin-bottom: 8px; font-weight: 600; color: #34495e;">Логин:</label>
-            <input type="text" id="login" name="login" required 
-                   style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px;">
+    <form method="POST">
+        <div>
+            <input type="text" name="login" placeholder="Логин" required>
         </div>
-        
-        <div style="margin-bottom: 25px;">
-            <label for="password" style="display: block; margin-bottom: 8px; font-weight: 600; color: #34495e;">Пароль:</label>
-            <input type="password" id="password" name="password" required 
-                   style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px;">
+        <div>
+            <input type="password" name="password" placeholder="Пароль" required>
         </div>
-        
-        <button type="submit" 
-                style="width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                       color: white; border: none; border-radius: 25px; font-size: 16px; font-weight: 600; 
-                       cursor: pointer; transition: all 0.3s ease;">
-            Войти
-        </button>
+        <button type="submit">Войти</button>
     </form>
     
-    <div style="text-align: center; margin-top: 25px;">
-        <p>Ещё нет аккаунта? <a href="/lab8/register" style="color: #3498db; font-weight: 600;">Зарегистрируйтесь</a></p>
-        <p style="margin-top: 10px;"><a href="/lab8" style="color: #7f8c8d; text-decoration: none;">← Вернуться на главную</a></p>
-    </div>
-</div>
-{% endblock %}
+    <p><a href="/lab8/register">Регистрация</a></p>
+    <p><a href="/">На главную</a></p>
+</body>
+</html>

@@ -1,100 +1,17 @@
-<!-- templates/lab8/articles.html -->
-{% extends "lab8/base.html" %}
-
-{% block title %}Статьи - Лабораторная работа 8{% endblock %}
-
-{% block content %}
-<h2 style="margin-bottom: 30px; color: #2c3e50;">Список статей</h2>
-
-{% if username and username != 'anonymous' %}
-<div style="text-align: right; margin-bottom: 20px;">
-    <a href="/lab8/create" 
-       style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; 
-              padding: 10px 20px; border-radius: 25px; text-decoration: none; font-weight: 600;">
-        ✏️ Создать статью
-    </a>
-</div>
-{% endif %}
-
-{% if error %}
-    <div class="error">{{ error }}</div>
-{% endif %}
-
-{% if articles %}
-<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px;">
-    {% for article in articles %}
-    <div style="background: white; border-radius: 10px; padding: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); 
-                border: 1px solid #e9ecef; transition: all 0.3s ease;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
-            <h3 style="color: #2c3e50; margin: 0; flex-grow: 1;">{{ article.title }}</h3>
-            {% if article.is_favorite %}
-            <span style="background: #f39c12; color: white; padding: 4px 10px; border-radius: 12px; 
-                        font-size: 0.8rem; font-weight: bold;">⭐ Избранное</span>
-            {% endif %}
-        </div>
-        
-        <div style="color: #555; line-height: 1.6; margin-bottom: 15px; max-height: 150px; overflow: hidden;">
-            {{ article.article_text[:200] }}{% if article.article_text|length > 200 %}...{% endif %}
-        </div>
-        
-        <div style="display: flex; justify-content: space-between; align-items: center; 
-                    margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
-            <div style="color: #7f8c8d; font-size: 0.9rem;">
-                {% if article.login_id %}
-                <span>Автор: {{ article.login_id }}</span>
-                {% endif %}
-                <div style="margin-top: 5px;">
-                    <span>❤️ {{ article.likes or 0 }} </span>
-                    {% if article.is_public %}
-                    <span style="margin-left: 10px;">🌍 Публичная</span>
-                    {% else %}
-                    <span style="margin-left: 10px;">🔒 Приватная</span>
-                    {% endif %}
-                </div>
-            </div>
-            
-            <div>
-                <a href="#" style="color: #3498db; text-decoration: none; font-weight: 600; 
-                                  padding: 8px 16px; border: 1px solid #3498db; border-radius: 5px;">
-                    Читать полностью →
-                </a>
-            </div>
-        </div>
-    </div>
-    {% endfor %}
-</div>
-
-{% if articles|length == 0 %}
-<div style="text-align: center; padding: 50px; background: #f8f9fa; border-radius: 10px; margin-top: 30px;">
-    <p style="color: #7f8c8d; font-size: 1.1rem;">Статьи пока не добавлены.</p>
-    {% if username and username != 'anonymous' %}
-    <a href="/lab8/create" style="display: inline-block; margin-top: 15px; color: #3498db; 
-                                  font-weight: 600; text-decoration: none;">
-        Создайте первую статью!
-    </a>
-    {% else %}
-    <p style="margin-top: 15px;">Войдите в систему, чтобы создать статью.</p>
-    {% endif %}
-</div>
-{% endif %}
-
-{% else %}
-<div style="text-align: center; padding: 60px 20px;">
-    <div style="font-size: 4rem; color: #ddd; margin-bottom: 20px;">📝</div>
-    <h3 style="color: #7f8c8d; margin-bottom: 15px;">Публичные статьи пока отсутствуют</h3>
-    <p style="color: #95a5a6;">Будьте первым, кто создаст статью!</p>
-    {% if username and username != 'anonymous' %}
-    <a href="/lab8/create" style="display: inline-block; margin-top: 20px; background: #3498db; 
-                                  color: white; padding: 12px 30px; border-radius: 25px; 
-                                  text-decoration: none; font-weight: 600;">
-        Создать статью
-    </a>
-    {% else %}
-    <a href="/lab8/login" style="display: inline-block; margin-top: 20px; color: #3498db; 
-                                 font-weight: 600; text-decoration: none;">
-        Войдите, чтобы создавать статьи
-    </a>
-    {% endif %}
-</div>
-{% endif %}
-{% endblock %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Статьи</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Статьи</h1>
+    
+    <p>Здесь будут статьи (пока заглушка)</p>
+    
+    <p><a href="/lab8/create/">Создать статью</a></p>
+    <p><a href="/lab8/">На главную лабы</a></p>
+</body>
+</html>

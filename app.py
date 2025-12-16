@@ -1,7 +1,11 @@
-from flask import Flask, url_for, request, redirect, abort, render_template
+from flask import Flask, url_for, request, redirect, abort, render_template, g
 import datetime
 import os
 from collections import deque
+from flask_login import LoginManager
+from dotenv import load_dotenv
+
+# Импорт blueprint'ов
 from lab1.lab1 import lab1
 from lab2.lab2 import lab2
 from lab3.lab3 import lab3
@@ -10,23 +14,36 @@ from lab5.lab5 import lab5
 from lab6.lab6 import lab6
 from lab7.lab7 import lab7 
 from lab8.lab8 import lab8
-from flask import g
-import sqlite3
-
 from rgz.rgz import rgz
-request_log = deque(maxlen=20)
-from dotenv import load_dotenv
-app = Flask(__name__)
 
+request_log = deque(maxlen=20)
 load_dotenv()
 
+app = Flask(__name__)
+
+# Конфигурация
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'секретно-секретный-секрет')
 app.config['DB_TYPE'] = os.getenv('DB_TYPE', 'postgres')
-
-# КОНФИГУРАЦИЯ БАЗЫ ДАННЫХ SQLALCHEMY
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# Инициализация Flask-Login
+login_manager = LoginManager()
+login_manager.login_view = 'lab8.login'
+login_manager.init_app(app)
+
+# Инициализация базы данных
+from database import db
+db.init_app(app)
+
+from database.models import users
+
+# User loader для Flask-Login
+@login_manager.user_loader
+def load_user(user_id):
+    return users.query.get(int(user_id))
+
+# Регистрация blueprint'ов
 app.register_blueprint(lab1)
 app.register_blueprint(lab2)
 app.register_blueprint(lab3)
@@ -37,25 +54,17 @@ app.register_blueprint(lab7)
 app.register_blueprint(lab8)
 app.register_blueprint(rgz)
 
-app.secret_key = 'секретно-секретный секрет'
-
-# Инициализация базы данных SQLAlchemy
-from db import db
-db.init_app(app)
-
-from db.models import users, articles
-
 @app.teardown_appcontext
-def close_db_connection(exception):
+def close_db_connection(exception=None):
     """Закрытие соединения с базой данных"""
-    db = getattr(g, '_database', None)
-    if db is not None:
-        db.close()
+    db_session = getattr(g, '_database_session', None)
+    if db_session is not None:
+        db_session.remove()
 
-# Создание таблиц при запуске (опционально)
+# Создание таблиц
 with app.app_context():
     db.create_all()
-    print("Таблицы базы данных созданы/проверены")
+    print("База данных инициализирована")
 
 @app.route('/')
 def main():
@@ -285,7 +294,7 @@ def internal_server_error(err=None):
 </html>""", 500
 
 @app.errorhandler(404)
-def not_found(err=None):  # Также добавляем значение по умолчанию для consistency
+def not_found(err=None):
     client_ip = request.remote_addr
     access_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     requested_path = request.path

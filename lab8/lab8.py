@@ -1,183 +1,278 @@
-from flask import Blueprint, render_template, jsonify, abort, request, redirect, url_for, session, flash, make_response, g
-import sqlite3
-import os
+from flask import Blueprint, render_template, request, redirect, url_for
+from flask_login import login_user, login_required, logout_user, current_user
+from werkzeug.security import check_password_hash, generate_password_hash
+from database import db
+from database.models import users, articles
 
 lab8 = Blueprint('lab8', __name__)
 
-# Конфигурация базы данных
-DATABASE = 'lab8.db'
+# Функция для создания базового HTML с CSS
+def render_lab8_page(title, content):
+    return f'''
+    <!DOCTYPE html>
+    <html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{title}</title>
+        <link rel="stylesheet" href="/static/lab8.css">
+    </head>
+    <body>
+        <div class="container">
+            <header class="header">
+                <h1>Лабораторная работа 8</h1>
+                <p>Система управления статьями</p>
+            </header>
+            
+            <nav class="nav">
+                <a href="/lab8/">Главная</a>
+                <a href="/lab8/articles/">Статьи</a>
+                <a href="/lab8/create/">Создать</a>
+                <a href="/">На сайт</a>
+            </nav>
+            
+            <div class="content">
+                {content}
+            </div>
+            
+            <footer class="footer">
+                <p>Лелюх Роман • ФБИ-34 • 2025</p>
+            </footer>
+        </div>
+    </body>
+    </html>
+    '''
 
-def get_db():
-    """Получение соединения с базой данных"""
-    db = getattr(g, '_database', None)
-    if db is None:
-        db = g._database = sqlite3.connect(DATABASE)
-        db.row_factory = sqlite3.Row
-    return db
-
-def close_connection(exception):
-    """Закрытие соединения с базой данных"""
-    db = getattr(g, '_database', None)
-    if db is not None:
-        db.close()
-
-def init_db():
-    """Инициализация базы данных"""
-    db = sqlite3.connect(DATABASE)
-    db.row_factory = sqlite3.Row
-    cursor = db.cursor()
-    
-    # Создание таблицы пользователей
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL,
-        email TEXT
-    )
-    ''')
-    
-    # Создание таблицы статей
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS articles (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
-        content TEXT NOT NULL,
-        user_id INTEGER,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users (id)
-    )
-    ''')
-    
-    db.commit()
-    db.close()
-
-# Инициализация базы данных при первом запуске
-if not os.path.exists(DATABASE):
-    init_db()
-
-@lab8.before_request
-def before_request():
-    """Установка соединения с БД перед каждым запросом"""
-    g.db = get_db()
-
-# Главная страница лабораторной
+# Главная страница
 @lab8.route('/lab8/')
 def main():
-    username = session.get('username', 'Anonymous')
-    return render_template('lab8/lab8.html', username=username)
+    if current_user.is_authenticated:
+        content = f'''
+        <div class="welcome">
+            <h2>Добро пожаловать, {current_user.login}!</h2>
+            <p>Вы успешно авторизовались в системе</p>
+            <div class="links">
+                <a href="/lab8/articles/" class="btn">Просмотреть статьи</a>
+                <a href="/lab8/create/" class="btn btn-success">Создать статью</a>
+                <a href="/lab8/logout" class="btn btn-outline">Выйти</a>
+            </div>
+        </div>
+        '''
+    else:
+        content = '''
+        <div class="welcome">
+            <h2>Система управления статьями</h2>
+            <p>Для работы с системой необходимо авторизоваться</p>
+            <div class="links">
+                <a href="/lab8/login" class="btn">Войти</a>
+                <a href="/lab8/register" class="btn btn-success">Регистрация</a>
+            </div>
+        </div>
+        '''
+    
+    return render_lab8_page("Главная", content)
 
 # Вход
 @lab8.route('/lab8/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        
-        cursor = g.db.cursor()
-        cursor.execute('SELECT * FROM users WHERE username = ? AND password = ?', 
-                      (username, password))
-        user = cursor.fetchone()
-        
-        if user:
-            session['username'] = username
-            session['user_id'] = user['id']
-            flash('Вы успешно вошли!', 'success')
-            return redirect(url_for('lab8.main'))
-        else:
-            flash('Неверное имя пользователя или пароль', 'error')
+    error = None
     
-    return render_template('lab8/login.html')
+    if request.method == 'POST':
+        login_form = request.form.get('login')
+        password_form = request.form.get('password')
+        
+        if not login_form or not password_form:
+            error = 'Заполните все поля'
+        else:
+            user = users.query.filter_by(login=login_form).first()
+            if user and check_password_hash(user.password, password_form):
+                login_user(user, remember=False)
+                return redirect('/lab8/')
+            else:
+                error = 'Неверный логин или пароль'
+    
+    content = f'''
+    <h2>Вход в систему</h2>
+    {f'<div class="alert alert-error">{error}</div>' if error else ''}
+    
+    <form method="POST">
+        <div class="form-group">
+            <label>Логин:</label>
+            <input type="text" name="login" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Пароль:</label>
+            <input type="password" name="password" required>
+        </div>
+        
+        <button type="submit" class="btn btn-block">Войти</button>
+    </form>
+    
+    <div class="text-center mt-20">
+        <p>Нет аккаунта? <a href="/lab8/register">Зарегистрируйтесь</a></p>
+    </div>
+    '''
+    
+    return render_lab8_page("Вход", content)
 
 # Регистрация
 @lab8.route('/lab8/register', methods=['GET', 'POST'])
 def register():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        email = request.form.get('email')
-        
-        cursor = g.db.cursor()
-        
-        try:
-            cursor.execute('INSERT INTO users (username, password, email) VALUES (?, ?, ?)',
-                          (username, password, email))
-            g.db.commit()
-            
-            session['username'] = username
-            cursor.execute('SELECT id FROM users WHERE username = ?', (username,))
-            user = cursor.fetchone()
-            session['user_id'] = user['id']
-            
-            flash('Регистрация прошла успешно!', 'success')
-            return redirect(url_for('lab8.main'))
-        except sqlite3.IntegrityError:
-            flash('Пользователь с таким именем уже существует', 'error')
+    error = None
     
-    return render_template('lab8/register.html')
+    if request.method == 'POST':
+        login_form = request.form.get('login')
+        password_form = request.form.get('password')
+        
+        if not login_form or not password_form:
+            error = 'Заполните все поля'
+        else:
+            existing_user = users.query.filter_by(login=login_form).first()
+            if existing_user:
+                error = 'Пользователь с таким логином уже существует'
+            else:
+                hashed_password = generate_password_hash(password_form)
+                try:
+                    new_user = users(login=login_form, password=hashed_password)
+                    db.session.add(new_user)
+                    db.session.commit()
+                    login_user(new_user, remember=False)
+                    return redirect('/lab8/')
+                except:
+                    db.session.rollback()
+                    error = 'Ошибка при регистрации'
+    
+    content = f'''
+    <h2>Регистрация</h2>
+    {f'<div class="alert alert-error">{error}</div>' if error else ''}
+    
+    <form method="POST">
+        <div class="form-group">
+            <label>Логин:</label>
+            <input type="text" name="login" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Пароль:</label>
+            <input type="password" name="password" required>
+        </div>
+        
+        <button type="submit" class="btn btn-block btn-success">Зарегистрироваться</button>
+    </form>
+    
+    <div class="text-center mt-20">
+        <p>Уже есть аккаунт? <a href="/lab8/login">Войдите</a></p>
+    </div>
+    '''
+    
+    return render_lab8_page("Регистрация", content)
 
 # Выход
 @lab8.route('/lab8/logout')
+@login_required
 def logout():
-    session.pop('username', None)
-    session.pop('user_id', None)
-    flash('Вы вышли из системы', 'info')
-    return redirect(url_for('lab8.main'))
+    logout_user()
+    return redirect('/lab8/')
 
 # Список статей
-@lab8.route('/lab8/articles')
-def articles():
-    cursor = g.db.cursor()
+@lab8.route('/lab8/articles/')
+@login_required
+def article_list():
+    articles_list = articles.query.all()
     
-    cursor.execute('''
-    SELECT articles.*, users.username 
-    FROM articles 
-    LEFT JOIN users ON articles.user_id = users.id 
-    ORDER BY articles.created_at DESC
-    ''')
-    articles_list = cursor.fetchall()
+    if articles_list:
+        articles_html = ''
+        for article in articles_list:
+            user = users.query.get(article.user_id)
+            delete_btn = ''
+            if article.user_id == current_user.id:
+                delete_btn = f'<a href="/lab8/delete/{article.id}" class="btn btn-danger" style="padding: 5px 10px; font-size: 14px;" onclick="return confirm(\'Удалить статью?\')">Удалить</a>'
+            
+            articles_html += f'''
+            <div class="card">
+                <h3 class="card-title">{article.title}</h3>
+                <div class="card-content">
+                    {article.content[:200]}{'...' if len(article.content) > 200 else ''}
+                </div>
+                <div class="card-meta">
+                    <span>Автор: {user.login if user else 'Неизвестно'}</span>
+                    {delete_btn}
+                </div>
+            </div>
+            '''
+    else:
+        articles_html = '<div class="alert alert-info">Статей пока нет. Будьте первым!</div>'
     
-    return render_template('lab8/articles.html', articles=articles_list)
+    content = f'''
+    <h2>Все статьи</h2>
+    <div class="mb-20">
+        <a href="/lab8/create/" class="btn">+ Новая статья</a>
+    </div>
+    
+    {articles_html}
+    '''
+    
+    return render_lab8_page("Статьи", content)
 
 # Создание статьи
 @lab8.route('/lab8/create', methods=['GET', 'POST'])
+@login_required
 def create_article():
-    if 'username' not in session or session['username'] == 'Anonymous':
-        flash('Для создания статьи необходимо войти в систему', 'error')
-        return redirect(url_for('lab8.login'))
+    error = None
     
     if request.method == 'POST':
         title = request.form.get('title')
-        content = request.form.get('content')
-        user_id = session.get('user_id')
+        content = request.form.get('article_text')
         
         if title and content:
-            cursor = g.db.cursor()
-            cursor.execute('INSERT INTO articles (title, content, user_id) VALUES (?, ?, ?)',
-                          (title, content, user_id))
-            g.db.commit()
-            flash('Статья успешно создана!', 'success')
-            return redirect(url_for('lab8.articles'))
+            try:
+                new_article = articles(
+                    title=title,
+                    content=content,
+                    user_id=current_user.id
+                )
+                db.session.add(new_article)
+                db.session.commit()
+                return redirect('/lab8/articles/')
+            except Exception as e:
+                db.session.rollback()
+                error = f'Ошибка: {str(e)}'
         else:
-            flash('Заполните все поля', 'error')
+            error = 'Заполните все поля'
     
-    return render_template('lab8/create.html')
+    content = f'''
+    <h2>Создать статью</h2>
+    {f'<div class="alert alert-error">{error}</div>' if error else ''}
+    
+    <form method="POST">
+        <div class="form-group">
+            <label>Заголовок:</label>
+            <input type="text" name="title" placeholder="Введите заголовок" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Текст статьи:</label>
+            <textarea name="article_text" placeholder="Напишите вашу статью..." required></textarea>
+        </div>
+        
+        <div class="links">
+            <button type="submit" class="btn btn-success">Опубликовать</button>
+            <a href="/lab8/articles/" class="btn btn-outline">Отмена</a>
+        </div>
+    </form>
+    '''
+    
+    return render_lab8_page("Создание статьи", content)
 
 # Удаление статьи
 @lab8.route('/lab8/delete/<int:article_id>')
+@login_required
 def delete_article(article_id):
-    if 'username' not in session:
-        return redirect(url_for('lab8.login'))
+    article = articles.query.get(article_id)
     
-    cursor = g.db.cursor()
+    if article and article.user_id == current_user.id:
+        db.session.delete(article)
+        db.session.commit()
     
-    # Проверяем, принадлежит ли статья текущему пользователю
-    cursor.execute('SELECT user_id FROM articles WHERE id = ?', (article_id,))
-    article = cursor.fetchone()
-    
-    if article and article['user_id'] == session.get('user_id'):
-        cursor.execute('DELETE FROM articles WHERE id = ?', (article_id,))
-        g.db.commit()
-        flash('Статья удалена', 'success')
-    
-    return redirect(url_for('lab8.articles'))
+    return redirect('/lab8/articles/')
