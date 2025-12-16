@@ -13,7 +13,7 @@
             padding: 20px;
         }
         .container {
-            max-width: 1200px;
+            max-width: 800px;
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.95);
             padding: 30px;
@@ -52,6 +52,46 @@
             color: #2d3436;
             margin-bottom: 20px;
         }
+        .content p {
+            font-size: 1.2em;
+            color: #636e72;
+            margin-bottom: 30px;
+        }
+        .newyear-btn {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            color: #333;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.3em;
+            font-weight: bold;
+            transition: all 0.3s;
+            border: 3px solid #ff6b6b;
+        }
+        .newyear-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(255, 107, 107, 0.3);
+        }
+        .features {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+        .feature {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 200px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .feature-icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
         footer {
             text-align: center;
             margin-top: 40px;
@@ -66,15 +106,36 @@
         <h1>🎄 Лабораторная работа 9 🎄</h1>
         
         <div class="nav">
-            <a href="/">Главная сайта</a>
-            <a href="/lab8/">Лабораторная 8</a>
-            <a href="/lab9/newyear">Новогодние подарки</a>
+            <a href="/">🏠 Главная сайта</a>
+            <a href="/lab8/">💾 Лабораторная 8</a>
+            <a href="/lab9/newyear">🎁 Новогодние подарки</a>
+            <a href="/lab9/auth">🔑 Авторизация</a>  <!-- Добавь эту строку -->
         </div>
         
         <div class="content">
             <h2>Новогодняя система поздравлений</h2>
-            <p>Открывайте подарки, получайте поздравления!</p>
-            <p>🎁 🎅 🦌 ⛄ ❄️</p>
+            <p>Добро пожаловать в праздничную лабораторную работу!</p>
+            <p>Здесь вы можете открыть новогодние подарки и получить уникальные поздравления.</p>
+            
+            <a href="/lab9/newyear" class="newyear-btn">🎅 Открыть подарки 🎄</a>
+            
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">🎁</div>
+                    <h3>10 подарков</h3>
+                    <p>Уникальные поздравления в каждой коробке</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Специальные подарки</h3>
+                    <p>Некоторые подарки только для авторизованных</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🎅</div>
+                    <h3>Дед Мороз</h3>
+                    <p>Авторизованные пользователи могут сбросить подарки</p>
+                </div>
+            </div>
         </div>
         
         <footer>

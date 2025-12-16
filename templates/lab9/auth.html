@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Авторизация - Лабораторная 9</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+        .user-status {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+            border-left: 5px solid;
+        }
+        .user-status.authenticated {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        .user-status.not-authenticated {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .user-info {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        .user-info strong {
+            color: #333;
+        }
+        .auth-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .btn-login {
+            background: #007bff;
+            color: white;
+        }
+        .btn-login:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+        .btn-register {
+            background: #28a745;
+            color: white;
+        }
+        .btn-register:hover {
+            background: #1e7e34;
+            transform: translateY(-2px);
+        }
+        .btn-logout {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-logout:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+        .btn-newyear {
+            background: #ff6b6b;
+            color: white;
+            padding: 15px 40px;
+            font-size: 1.1em;
+        }
+        .btn-newyear:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+        }
+        .nav {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .nav a {
+            padding: 10px 20px;
+            background: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            transition: all 0.3s;
+        }
+        .nav a:hover {
+            background: #545b62;
+            transform: translateY(-2px);
+        }
+        .message {
+            text-align: center;
+            margin-top: 30px;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.1em;
+        }
+        .message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .features {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .features h3 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .features ul {
+            list-style: none;
+            padding: 0;
+        }
+        .features li {
+            padding: 8px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .features li:last-child {
+            border-bottom: none;
+        }
+        .features li::before {
+            content: "🎁 ";
+        }
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎅 Авторизация - Новогодние Подарки 🎄</h1>
+        
+        <div class="nav">
+            <a href="/">🏠 Главная сайта</a>
+            <a href="/lab9/">📚 Лабораторная 9</a>
+            <a href="/lab9/newyear">🎁 Подарки</a>
+        </div>
+        
+        {% if is_authenticated %}
+        <div class="user-status authenticated">
+            <div class="user-info">
+                ✅ <strong>Вы авторизованы!</strong>
+            </div>
+            <div class="user-info">
+                Пользователь: <strong>{{ user_login }}</strong>
+            </div>
+            <div class="auth-buttons">
+                <a href="/lab9/newyear" class="btn btn-newyear">🎁 Открыть подарки</a>
+                <a href="/lab8/logout" class="btn btn-logout">🚪 Выйти</a>
+            </div>
+        </div>
+        
+        <div class="message info">
+            🎉 Отлично! Теперь вам доступны все функции:
+            <ul style="text-align: left; margin-top: 10px;">
+                <li>✅ Все 10 подарков (включая специальные)</li>
+                <li>✅ Функция "Дед Мороз" (сброс подарков)</li>
+                <li>✅ Больше возможностей для взаимодействия</li>
+            </ul>
+        </div>
+        {% else %}
+        <div class="user-status not-authenticated">
+            <div class="user-info">
+                ⚠️ <strong>Вы не авторизованы</strong>
+            </div>
+            <div class="user-info">
+                Гостевой режим: доступно 6 из 10 подарков
+            </div>
+            <div class="auth-buttons">
+                <a href="/lab8/login" class="btn btn-login">🔑 Войти</a>
+                <a href="/lab8/register" class="btn btn-register">📝 Регистрация</a>
+                <a href="/lab9/newyear" class="btn btn-newyear">🎁 Продолжить как гость</a>
+            </div>
+        </div>
+        
+        <div class="features">
+            <h3>🎯 Преимущества авторизации:</h3>
+            <ul>
+                <li>🔓 Доступ ко всем 10 подаркам (а не только к 6)</li>
+                <li>🎅 Возможность сбросить подарки (функция "Дед Мороз")</li>
+                <li>💾 Сохранение прогресса между сессиями</li>
+                <li>⭐ Специальные новогодние подарки</li>
+                <li>📊 Статистика ваших открытий</li>
+            </ul>
+        </div>
+        {% endif %}
+        
+        <footer>
+            <p>ФБИ-34 • Лабораторная работа 9 • 2025</p>
+        </footer>
+    </div>
+</body>
+</html>
