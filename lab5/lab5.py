@@ -90,7 +90,7 @@ def db_connect():
         conn.row_factory = sqlite3.Row
         cur = conn.cursor()
         
-        # Создаем таблицы если их нет
+        # Создаем таблицы если их нет ываываываыв
         cur.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
