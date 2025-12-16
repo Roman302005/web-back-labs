@@ -47,6 +47,15 @@ def close_db_connection(exception):
     if db is not None:
         db.close()
 
+
+
+# Инициализация базы данных
+from db import db
+db.init_app(app)
+
+from db.models import users, articles
+
+
 @app.route('/')
 def main():
     return """<!doctype html>
