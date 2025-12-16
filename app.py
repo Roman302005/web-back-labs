@@ -13,7 +13,6 @@ from lab8.lab8 import lab8
 from flask import g
 import sqlite3
 
-
 from rgz.rgz import rgz
 request_log = deque(maxlen=20)
 from dotenv import load_dotenv
@@ -24,7 +23,9 @@ load_dotenv()
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'секретно-секретный-секрет')
 app.config['DB_TYPE'] = os.getenv('DB_TYPE', 'postgres')
 
-
+# КОНФИГУРАЦИЯ БАЗЫ ДАННЫХ SQLALCHEMY
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.register_blueprint(lab1)
 app.register_blueprint(lab2)
@@ -38,7 +39,11 @@ app.register_blueprint(rgz)
 
 app.secret_key = 'секретно-секретный секрет'
 
+# Инициализация базы данных SQLAlchemy
+from db import db
+db.init_app(app)
 
+from db.models import users, articles
 
 @app.teardown_appcontext
 def close_db_connection(exception):
@@ -47,14 +52,10 @@ def close_db_connection(exception):
     if db is not None:
         db.close()
 
-
-
-# Инициализация базы данных
-from db import db
-db.init_app(app)
-
-from db.models import users, articles
-
+# Создание таблиц при запуске (опционально)
+with app.app_context():
+    db.create_all()
+    print("Таблицы базы данных созданы/проверены")
 
 @app.route('/')
 def main():
@@ -172,9 +173,6 @@ def main():
         </div>
     </body>
     </html>""", 200, {"Content-Type": "text/html; charset=utf-8"}
-
-
-
 
 @app.errorhandler(500)
 def internal_server_error(err=None):  
