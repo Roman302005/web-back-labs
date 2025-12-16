@@ -139,52 +139,10 @@ def main():
                <a href="/lab5">Лабораторная работа 5</a>
                <a href="/lab6">Лабораторная работа 6</a>
                <a href="/lab7">Лабораторная работа 7</a>
+                <a href="/lab8">Лабораторная работа 8</a>
                <a href="/rgz">RGZ Мессенджер</a>
             </div>
 
-            <div class="lab-section">
-                <h3>🔧 Лабораторная работа 1 - Основы Flask</h3>
-                <ul class="lab-links">
-                    <li><a href="/lab1/author">👨‍🎓 Автор</a></li>
-                    <li><a href="/lab1/image">🖼️ Картинка</a></li>
-                    <li><a href="/lab1/counter">🔢 Счётчик посещений</a></li>
-                    <li><a href="/lab1/counter/clear">🔄 Сброс счётчика</a></li>
-                    <li><a href="/lab1/info">↪️ Редирект</a></li>
-                    <li><a href="/lab1/created">✅ 201 Created</a></li>
-                </ul>
-            </div>
-
-            <div class="lab-section">
-                <h3>⚡ Лабораторная работа 2 - Расширенные возможности</h3>
-                <ul class="lab-links">
-                    <li><a href="/lab2/flowers">🌷 Работа с цветами</a></li>
-                    <li><a href="/lab2/flowers/0">🌹 Пример цветка</a></li>
-                    <li><a href="/lab2/add_flower/орхидея">➕ Добавить цветок</a></li>
-                    <li><a href="/lab2/clear_flowers">🗑️ Очистить цветы</a></li>
-                    <li><a href="/lab2/calc">🧮 Калькулятор</a></li>
-                    <li><a href="/lab2/calc/5/3">🔢 Пример вычислений</a></li>
-                    <li><a href="/lab2/books">📚 Список книг</a></li>
-                    <li><a href="/lab2/cars">🚗 Галерея автомобилей</a></li>
-                    <li><a href="/lab2/example">🎨 Пример шаблона</a></li>
-                    <li><a href="/lab2/filters">🔧 Фильтры Jinja2</a></li>
-                    <li><a href="/laba2/a">🔗 Без слэша</a></li>
-                    <li><a href="/laba2/a/">🔗 Со слэшем</a></li>
-                </ul>
-            </div>
-
-            <div class="lab-section">
-                <h3>🚨 Коды ошибок HTTP</h3>
-                <ul class="lab-links">
-                    <li><a href="/400">❌ 400 Bad Request</a></li>
-                    <li><a href="/401">🔐 401 Unauthorized</a></li>
-                    <li><a href="/402">💳 402 Payment Required</a></li>
-                    <li><a href="/403">🚫 403 Forbidden</a></li>
-                    <li><a href="/405">⚡ 405 Method Not Allowed</a></li>
-                    <li><a href="/418">🍵 418 I'm a teapot</a></li>
-                    <li><a href="/error500">💥 500 Internal Server Error</a></li>
-                </ul>
-            </div>
-            
             <footer>
                 <p>Лелюх Роман Вячеславович, ФБИ-34, 3 курс, 2025</p>
             </footer>

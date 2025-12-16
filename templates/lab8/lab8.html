@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторная работа 8</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .user-info {
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        nav {
+            background: white;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #3498db;
+            font-weight: bold;
+            padding: 0.5rem 1rem;
+            border: 2px solid #3498db;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            background: #3498db;
+            color: white;
+        }
+
+        main {
+            background: white;
+            padding: 2rem;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            min-height: 400px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            padding: 1rem;
+            color: #666;
+        }
+
+        .welcome-message {
+            text-align: center;
+            margin-top: 50px;
+            color: #2c3e50;
+        }
+
+        .welcome-message h2 {
+            margin-bottom: 20px;
+            color: #3498db;
+        }
+
+        .user-status {
+            display: inline-block;
+            padding: 5px 15px;
+            background: #ecf0f1;
+            border-radius: 20px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>WEB-программирование, часть 2. Лабораторная работа 8</h1>
+            <div class="user-info">
+                Пользователь: <strong>{{ username }}</strong>
+                <div class="user-status">
+                    {% if username == 'anonymous' %}
+                        Гость
+                    {% else %}
+                        Авторизован
+                    {% endif %}
+                </div>
+            </div>
+        </header>
+
+        <nav>
+            <ul class="nav-links">
+                <li><a href="/lab8">Главная</a></li>
+                <li><a href="/lab8/login">Вход</a></li>
+                <li><a href="/lab8/register">Регистрация</a></li>
+                <li><a href="/lab8/articles">Список статей</a></li>
+                <li><a href="/lab8/create">Создать статью</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <div class="welcome-message">
+                <h2>Добро пожаловать в систему управления статьями!</h2>
+                <p>Эта страница является заготовкой для лабораторной работы №8</p>
+                <p>Используйте навигацию выше для перехода между разделами</p>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Лелюх Роман, ФБИ-34, 3 курс</p>
+        </footer>
+    </div>
+</body>
+</html>

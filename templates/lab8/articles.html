@@ -1,0 +1,195 @@
+<!-- templates/lab8/articles.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Статьи - Лабораторная работа 8</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .user-info {
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        nav {
+            background: white;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #3498db;
+            font-weight: bold;
+            padding: 0.5rem 1rem;
+            border: 2px solid #3498db;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            background: #3498db;
+            color: white;
+        }
+
+        main {
+            background: white;
+            padding: 2rem;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            padding: 1rem;
+            color: #666;
+        }
+
+        .articles-list {
+            margin-top: 20px;
+        }
+
+        .article-item {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+
+        .article-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .article-content {
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .article-meta {
+            font-size: 0.9rem;
+            color: #777;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #ddd;
+        }
+
+        .no-articles {
+            text-align: center;
+            padding: 40px;
+            color: #777;
+            font-style: italic;
+        }
+
+        .create-article-btn {
+            display: block;
+            width: 200px;
+            margin: 20px auto;
+            padding: 10px 15px;
+            background: #2ecc71;
+            color: white;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .create-article-btn:hover {
+            background: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>WEB-программирование, часть 2. Лабораторная работа 8</h1>
+            <div class="user-info">
+                Пользователь: <strong>{{ username }}</strong>
+            </div>
+        </header>
+
+        <nav>
+            <ul class="nav-links">
+                <li><a href="/lab8">Главная</a></li>
+                <li><a href="/lab8/login">Вход</a></li>
+                <li><a href="/lab8/register">Регистрация</a></li>
+                <li><a href="/lab8/articles">Список статей</a></li>
+                <li><a href="/lab8/create">Создать статью</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <h2>Список статей</h2>
+            
+            <a href="/lab8/create" class="create-article-btn">Создать новую статью</a>
+            
+            <div class="articles-list">
+                <!-- Здесь будут статьи -->
+                <div class="no-articles">
+                    Статьи пока отсутствуют. Создайте первую статью!
+                </div>
+                
+                <!-- Пример статьи (будет удалено при реализации БД) -->
+                <div class="article-item">
+                    <div class="article-title">Пример статьи</div>
+                    <div class="article-content">
+                        Это пример статьи. Здесь будет отображаться текст статьи, созданной пользователями системы.
+                    </div>
+                    <div class="article-meta">
+                        Автор: admin | Дата: 2025-12-16
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Лелюх Роман, ФБИ-34, 3 курс</p>
+        </footer>
+    </div>
+</body>
+</html>
